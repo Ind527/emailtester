@@ -78,39 +78,11 @@ def single_email_validation():
                 with st.spinner("Validating email..."):
                     result = validator.validate_single_email(email_to_validate)
                 
-                # Display results
-                st.markdown("### Validation Results")
-                
-                col1_result, col2_result = st.columns(2)
-                
-                with col1_result:
-                    if result['is_valid']:
-                        st.success(f"✅ **{email_to_validate}** succeed!")
-                    else:
-                        st.error(f"❌ **{email_to_validate}** not successful!")
-                
-                with col2_result:
-                    st.info(f"📊 **Confidence Score:** {result['confidence']:.2f}%")
-                
-                # Detailed breakdown
-                st.markdown("#### Detailed Analysis")
-                
-                checks = [
-                    ("Syntax Check", result['syntax_valid'], "✅" if result['syntax_valid'] else "❌"),
-                    ("Domain Exists", result['domain_valid'], "✅" if result['domain_valid'] else "❌"),
-                    ("MX Record Found", result['mx_valid'], "✅" if result['mx_valid'] else "❌"),
-                    ("SMTP Verification", result['smtp_valid'], "✅" if result['smtp_valid'] else "❌")
-                ]
-                
-                for check_name, status, icon in checks:
-                    if check_name == "SMTP Verification":
-                        status_text = 'succeed' if status else 'not successful'
-                    else:
-                        status_text = 'succeed' if status else 'not successful'
-                    st.write(f"{icon} **{check_name}:** {status_text}")
-                
-                if result['error']:
-                    st.warning(f"⚠️ **Note:** {result['error']}")
+                # Display simple results
+                if result['is_valid']:
+                    st.success(f"✅ **{email_to_validate}** valid")
+                else:
+                    st.error(f"❌ **{email_to_validate}** invalid")
             else:
                 st.warning("Please enter an email address to validate.")
     
