@@ -47,3 +47,6 @@ args = "uv add email-validator dnspython"
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[agent]
+integrations = ["web_scraper==1.0.0"]

@@ -7,5 +7,7 @@ dependencies = [
     "dnspython>=2.7.0",
     "email-validator>=2.2.0",
     "pandas>=2.3.2",
+    "requests>=2.32.5",
     "streamlit>=1.48.1",
+    "trafilatura>=2.0.0",
 ]

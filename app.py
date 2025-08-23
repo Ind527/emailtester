@@ -27,7 +27,7 @@ def main():
     st.sidebar.title("Navigation")
     page = st.sidebar.selectbox(
         "Choose a feature:",
-        ["Single Email Validation", "Bulk Email Validation", "Email Sender", "Scheduled Emails"]
+        ["Single Email Validation", "Bulk Email Validation", "Email Discovery", "Email Sender", "Scheduled Emails"]
     )
     
     # Email credentials sidebar
@@ -58,6 +58,9 @@ def main():
     elif page == "Bulk Email Validation":
         from pages.bulk_validation import show_bulk_validation
         show_bulk_validation()
+    elif page == "Email Discovery":
+        from pages.email_discovery import show_email_discovery
+        show_email_discovery()
     elif page == "Email Sender":
         email_sender_page()
     elif page == "Scheduled Emails":

@@ -1,6 +1,6 @@
 # Overview
 
-This is a comprehensive Email Validation & Bulk Sender Tool built with Streamlit. The application provides email validation services, bulk email sending capabilities, and scheduled email management. It features a multi-page interface for single/bulk email validation, personalized bulk email campaigns, and scheduled email delivery with real-time monitoring.
+This is a comprehensive Email Validation & Bulk Sender Tool built with Streamlit. The application provides email validation services, bulk email sending capabilities, email discovery from domains (like hunter.io), and scheduled email management. It features a multi-page interface for single/bulk email validation, domain-based email discovery, personalized bulk email campaigns, and scheduled email delivery with real-time monitoring.
 
 # User Preferences
 
@@ -28,6 +28,13 @@ Preferred communication style: Simple, everyday language.
 - **MX Record Validation**: Mail exchanger record verification
 - **SMTP Verification**: Optional connection testing to target mail servers
 - **Caching**: MX record caching for performance optimization
+
+### Email Discovery System (Hunter.io-like)
+- **Web Scraping**: Uses trafilatura for website content extraction
+- **Multi-page Scanning**: Searches common pages (contact, about, team, careers)
+- **Pattern Generation**: Creates common email patterns based on domain
+- **Email Extraction**: Regex-based email detection from website content
+- **Validation Integration**: Verifies discovered emails using validation system
 
 ### Email Delivery System
 - **SMTP Integration**: Configurable SMTP servers with SSL/TLS support
@@ -62,6 +69,8 @@ Preferred communication style: Simple, everyday language.
 - **email-validator**: RFC-compliant email syntax validation
 - **dnspython**: DNS resolution for domain and MX record verification
 - **smtplib**: Built-in SMTP client for email delivery
+- **trafilatura**: Web content extraction for email discovery
+- **requests**: HTTP client for web scraping and domain access
 
 ## Email Services
 - **SMTP Servers**: Configurable support for Gmail, Outlook, and custom SMTP providers
