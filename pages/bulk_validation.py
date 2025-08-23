@@ -5,73 +5,106 @@ import time
 
 def show_bulk_validation():
     st.header("📋 Bulk Email Validation")
-    st.markdown("Upload a CSV file containing email addresses to validate them all at once.")
+    st.markdown("Validate multiple email addresses at once using CSV upload or direct paste.")
     
-    # File upload section
-    uploaded_file = st.file_uploader(
-        "Choose a CSV file",
-        type=['csv'],
-        help="Your CSV file should contain a column with email addresses"
+    # Input method selection
+    input_method = st.radio(
+        "Choose input method:",
+        ["📄 Upload CSV File", "📝 Paste Email Addresses"],
+        horizontal=True
     )
     
-    if uploaded_file is not None:
-        try:
-            # Read CSV file
-            df = pd.read_csv(uploaded_file)
-            
-            st.subheader("📊 Data Preview")
-            st.dataframe(df.head(10), use_container_width=True)
-            
-            # Column selection
-            st.subheader("🎯 Select Email Column")
-            email_column = st.selectbox(
-                "Which column contains the email addresses?",
-                df.columns,
-                index=0 if 'email' not in [col.lower() for col in df.columns] 
-                else [col.lower() for col in df.columns].index('email')
-            )
-            
-            # Preview selected emails
-            if email_column:
-                emails_to_validate = df[email_column].dropna().unique().tolist()
-                st.info(f"Found {len(emails_to_validate)} unique email addresses to validate")
-                
-                with st.expander("Preview email addresses", expanded=False):
-                    st.write(emails_to_validate[:20])  # Show first 20
-                    if len(emails_to_validate) > 20:
-                        st.write(f"... and {len(emails_to_validate) - 20} more")
-            
-            # Validation settings
-            st.subheader("⚙️ Validation Settings")
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                skip_smtp = st.checkbox(
-                    "Skip SMTP verification (faster)",
-                    value=False,
-                    help="SMTP verification is more accurate but slower"
-                )
-            
-            with col2:
-                batch_size = st.slider(
-                    "Batch size",
-                    min_value=10,
-                    max_value=100,
-                    value=50,
-                    help="Number of emails to validate at once"
-                )
-            
-            # Start validation
-            if st.button("🚀 Start Validation", type="primary"):
-                emails_to_validate = df[email_column].dropna().unique().tolist() if email_column else []
-                if emails_to_validate:
-                    validate_emails(emails_to_validate, skip_smtp, batch_size)
-                else:
-                    st.error("No valid email addresses found in the selected column")
+    emails_to_validate = []
+    
+    if input_method == "📄 Upload CSV File":
+        # File upload section
+        uploaded_file = st.file_uploader(
+            "Choose a CSV file",
+            type=['csv'],
+            help="Your CSV file should contain a column with email addresses"
+        )
         
-        except Exception as e:
-            st.error(f"Error reading CSV file: {str(e)}")
-            st.info("Make sure your CSV file is properly formatted and contains email addresses")
+        if uploaded_file is not None:
+            try:
+                # Read CSV file
+                df = pd.read_csv(uploaded_file)
+                
+                st.subheader("📊 Data Preview")
+                st.dataframe(df.head(10), use_container_width=True)
+                
+                # Column selection
+                st.subheader("🎯 Select Email Column")
+                email_column = st.selectbox(
+                    "Which column contains the email addresses?",
+                    df.columns,
+                    index=0 if 'email' not in [col.lower() for col in df.columns] 
+                    else [col.lower() for col in df.columns].index('email')
+                )
+                
+                # Preview selected emails
+                if email_column:
+                    emails_to_validate = df[email_column].dropna().unique().tolist()
+                    st.info(f"Found {len(emails_to_validate)} unique email addresses to validate")
+                    
+                    with st.expander("Preview email addresses", expanded=False):
+                        st.write(emails_to_validate[:20])  # Show first 20
+                        if len(emails_to_validate) > 20:
+                            st.write(f"... and {len(emails_to_validate) - 20} more")
+            
+            except Exception as e:
+                st.error(f"Error reading CSV file: {str(e)}")
+                st.info("Make sure your CSV file is properly formatted and contains email addresses")
+    
+    elif input_method == "📝 Paste Email Addresses":
+        # Direct paste section
+        st.subheader("📝 Paste Email Addresses")
+        
+        email_text = st.text_area(
+            "Enter email addresses (one per line):",
+            height=200,
+            placeholder="user1@example.com\nuser2@domain.com\nuser3@test.org\n...",
+            help="Enter one email address per line"
+        )
+        
+        if email_text:
+            # Parse pasted emails
+            raw_emails = [email.strip() for email in email_text.split('\n') if email.strip()]
+            emails_to_validate = list(set(raw_emails))  # Remove duplicates
+            
+            st.info(f"Found {len(emails_to_validate)} unique email addresses to validate")
+            
+            with st.expander("Preview email addresses", expanded=False):
+                st.write(emails_to_validate[:20])  # Show first 20
+                if len(emails_to_validate) > 20:
+                    st.write(f"... and {len(emails_to_validate) - 20} more")
+    
+    # Validation settings (common for both methods)
+    if emails_to_validate:
+        st.subheader("⚙️ Validation Settings")
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            skip_smtp = st.checkbox(
+                "Skip SMTP verification (faster)",
+                value=False,
+                help="SMTP verification is more accurate but slower"
+            )
+        
+        with col2:
+            batch_size = st.slider(
+                "Batch size",
+                min_value=10,
+                max_value=100,
+                value=50,
+                help="Number of emails to validate at once"
+            )
+        
+        # Start validation
+        if st.button("🚀 Start Validation", type="primary"):
+            if emails_to_validate:
+                validate_emails(emails_to_validate, skip_smtp, batch_size)
+            else:
+                st.error("No valid email addresses found")
 
 def validate_emails(emails, skip_smtp, batch_size):
     """Validate a list of emails with progress tracking"""
