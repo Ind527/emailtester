@@ -85,9 +85,9 @@ def single_email_validation():
                 
                 with col1_result:
                     if result['is_valid']:
-                        st.success(f"✅ **{email_to_validate}** is valid!")
+                        st.success(f"✅ **{email_to_validate}** succeed!")
                     else:
-                        st.error(f"❌ **{email_to_validate}** is invalid!")
+                        st.error(f"❌ **{email_to_validate}** not successful!")
                 
                 with col2_result:
                     st.info(f"📊 **Confidence Score:** {result['confidence']:.2f}%")
@@ -103,7 +103,11 @@ def single_email_validation():
                 ]
                 
                 for check_name, status, icon in checks:
-                    st.write(f"{icon} **{check_name}:** {'Pass' if status else 'Fail'}")
+                    if check_name == "SMTP Verification":
+                        status_text = 'succeed' if status else 'not successful'
+                    else:
+                        status_text = 'succeed' if status else 'not successful'
+                    st.write(f"{icon} **{check_name}:** {status_text}")
                 
                 if result['error']:
                     st.warning(f"⚠️ **Note:** {result['error']}")
