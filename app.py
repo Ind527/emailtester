@@ -70,22 +70,25 @@ def single_email_validation():
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        email_to_validate = st.text_input("Enter email address to validate:", placeholder="example@domain.com")
-        
-        if st.button("Validate Email", type="primary"):
-            if email_to_validate:
-                validator = EmailValidator()
-                
-                with st.spinner("Validating email..."):
-                    result = validator.validate_single_email(email_to_validate)
-                
-                # Display simple results
-                if result['is_valid']:
-                    st.success(f"✅ **{email_to_validate}** valid")
+        # Use form to enable Enter key validation
+        with st.form("email_validation_form"):
+            email_to_validate = st.text_input("Enter email address to validate:", placeholder="example@domain.com")
+            submitted = st.form_submit_button("Validate Email", type="primary")
+            
+            if submitted:
+                if email_to_validate:
+                    validator = EmailValidator()
+                    
+                    with st.spinner("Validating email..."):
+                        result = validator.validate_single_email(email_to_validate)
+                    
+                    # Display simple results
+                    if result['is_valid']:
+                        st.success(f"✅ **{email_to_validate}** valid")
+                    else:
+                        st.error(f"❌ **{email_to_validate}** invalid")
                 else:
-                    st.error(f"❌ **{email_to_validate}** invalid")
-            else:
-                st.warning("Please enter an email address to validate.")
+                    st.warning("Please enter an email address to validate.")
     
     with col2:
         st.markdown("### Validation Features")

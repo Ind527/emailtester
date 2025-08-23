@@ -222,30 +222,24 @@ def show_validation_results(results, container, final=False):
             
             col1, col2 = st.columns(2)
             
-            with col1:
-                # Full results export
-                csv_data = results_df.to_csv(index=False)
+            # Only export valid emails (remove invalid ones)
+            valid_emails_df = results_df[results_df['is_valid'] == True]
+            
+            if not valid_emails_df.empty:
+                # Create simple CSV with only valid emails
+                valid_emails_series = valid_emails_df['email']
+                valid_csv = valid_emails_series.to_csv(index=False, header=True)
+                
                 st.download_button(
-                    label="📄 Download All Results (CSV)",
-                    data=csv_data,
-                    file_name=f"email_validation_results_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                    label="📥 Download Valid Emails (CSV)",
+                    data=valid_csv,
+                    file_name=f"valid_emails_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv"
                 )
-            
-            with col2:
-                # Valid emails only
-                valid_emails_df = results_df[results_df['is_valid'] == True]
-                if not valid_emails_df.empty:
-                    valid_emails_series = valid_emails_df['email']
-                    valid_csv = valid_emails_series.to_csv(index=False, header=True)
-                    st.download_button(
-                        label="✅ Download Valid Emails Only",
-                        data=valid_csv,
-                        file_name=f"valid_emails_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.csv",
-                        mime="text/csv"
-                    )
-                else:
-                    st.info("No valid emails to export")
+                
+                st.info(f"✅ {len(valid_emails_df)} valid emails ready for download (invalid emails excluded)")
+            else:
+                st.info("❌ No valid emails found to export")
 
 if __name__ == "__main__":
     show_bulk_validation()
