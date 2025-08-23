@@ -5,6 +5,7 @@ from urllib.parse import urljoin, urlparse
 import time
 from typing import List, Dict, Set
 import dns.resolver
+import urllib3
 
 
 class EmailDiscovery:
@@ -27,6 +28,19 @@ class EmailDiscovery:
             '/help'
         ]
         
+        # Setup request session with proper headers
+        self.session = requests.Session()
+        self.session.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+        })
+        self.session.verify = False  # Handle SSL issues for some sites
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)  # Disable SSL warnings
+        
     def discover_emails_from_domain(self, domain: str, max_pages: int = 5) -> Dict:
         """
         Discover email addresses from a domain website
@@ -43,15 +57,38 @@ class EmailDiscovery:
         }
         
         try:
-            # Check if domain is reachable
-            response = requests.head(domain, timeout=10, allow_redirects=True)
+            # Check if domain is reachable with better method
+            response = self.session.get(domain, timeout=15, allow_redirects=True)
             if response.status_code >= 400:
                 result['status'] = 'domain_unreachable'
+                result['error'] = f'HTTP {response.status_code}: {response.reason}'
                 return result
                 
+        except requests.exceptions.SSLError:
+            # Try with HTTP if HTTPS fails
+            try:
+                http_domain = domain.replace('https://', 'http://')
+                response = self.session.get(http_domain, timeout=15, allow_redirects=True)
+                if response.status_code >= 400:
+                    result['status'] = 'domain_unreachable'
+                    result['error'] = f'HTTP {response.status_code}: {response.reason}'
+                    return result
+                domain = http_domain  # Use HTTP version if HTTPS fails
+            except Exception as e:
+                result['status'] = 'domain_unreachable'
+                result['error'] = f'SSL Error and HTTP fallback failed: {str(e)}'
+                return result
+        except requests.exceptions.Timeout:
+            result['status'] = 'domain_unreachable'
+            result['error'] = 'Connection timeout - domain took too long to respond'
+            return result
+        except requests.exceptions.ConnectionError:
+            result['status'] = 'domain_unreachable'
+            result['error'] = 'Connection failed - unable to reach domain'
+            return result
         except Exception as e:
             result['status'] = 'domain_unreachable'
-            result['error'] = str(e)
+            result['error'] = f'Unexpected error: {str(e)}'
             return result
         
         pages_to_scan = []
@@ -92,21 +129,45 @@ class EmailDiscovery:
         emails = set()
         
         try:
-            # Use trafilatura to get clean text content
-            downloaded = trafilatura.fetch_url(url)
-            if downloaded:
-                text_content = trafilatura.extract(downloaded)
-                if text_content:
-                    # Find emails in text content
-                    found_emails = self.email_pattern.findall(text_content)
-                    emails.update(found_emails)
-                
-                # Also try to get raw HTML for emails that might not be in text
-                html_emails = self.email_pattern.findall(downloaded)
+            # Try to fetch content using our configured session first
+            response = self.session.get(url, timeout=10, allow_redirects=True)
+            if response.status_code == 200:
+                # Extract emails from raw HTML
+                html_emails = self.email_pattern.findall(response.text)
                 emails.update(html_emails)
                 
+                # Use trafilatura for clean text extraction
+                text_content = trafilatura.extract(response.text)
+                if text_content:
+                    found_emails = self.email_pattern.findall(text_content)
+                    emails.update(found_emails)
+            else:
+                # Fallback to trafilatura's fetch method
+                downloaded = trafilatura.fetch_url(url)
+                if downloaded:
+                    text_content = trafilatura.extract(downloaded)
+                    if text_content:
+                        found_emails = self.email_pattern.findall(text_content)
+                        emails.update(found_emails)
+                    
+                    # Also check raw HTML
+                    html_emails = self.email_pattern.findall(downloaded)
+                    emails.update(html_emails)
+                
         except Exception as e:
-            pass
+            # If our method fails, try trafilatura fallback
+            try:
+                downloaded = trafilatura.fetch_url(url)
+                if downloaded:
+                    text_content = trafilatura.extract(downloaded)
+                    if text_content:
+                        found_emails = self.email_pattern.findall(text_content)
+                        emails.update(found_emails)
+                    
+                    html_emails = self.email_pattern.findall(downloaded)
+                    emails.update(html_emails)
+            except:
+                pass
         
         # Filter out common false positives
         filtered_emails = set()
