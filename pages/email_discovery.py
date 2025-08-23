@@ -9,10 +9,16 @@ def show_email_discovery():
     st.header("🔍 Email Discovery")
     st.markdown("Temukan alamat email dari domain website seperti hunter.io")
     
+    # Initialize session state for discovery results
+    if 'discovery_results' not in st.session_state:
+        st.session_state.discovery_results = None
+    if 'pattern_verification' not in st.session_state:
+        st.session_state.pattern_verification = None
+    
     col1, col2 = st.columns([2, 1])
     
     with col1:
-        # Domain input
+        # Domain input form
         with st.form("domain_discovery_form"):
             domain_input = st.text_input(
                 "Masukkan domain website:",
@@ -40,105 +46,116 @@ def show_email_discovery():
                     st.error(f"❌ Domain {domain_input} tidak dapat diakses")
                     if 'error' in result:
                         st.error(f"Error: {result['error']}")
+                    st.session_state.discovery_results = None
+                    st.session_state.pattern_verification = None
                 else:
-                    # Display results
-                    st.success(f"✅ Pencarian selesai untuk {result['domain']}")
+                    # Store results in session state
+                    st.session_state.discovery_results = result
                     
-                    # Summary metrics
-                    col_m1, col_m2, col_m3 = st.columns(3)
-                    
-                    with col_m1:
-                        st.metric("Email Ditemukan", len(result['emails_found']))
-                    
-                    with col_m2:
-                        st.metric("Halaman Di-scan", len(result['pages_scanned']))
-                    
-                    with col_m3:
-                        st.metric("Pola Email", len(result['common_patterns']))
-                    
-                    # Discovered emails
-                    if result['emails_found']:
-                        st.subheader("📧 Email yang Ditemukan")
-                        
-                        emails_df = pd.DataFrame({
-                            'Email': result['emails_found'],
-                            'Status': ['Ditemukan'] * len(result['emails_found'])
-                        })
-                        
-                        st.dataframe(emails_df, use_container_width=True)
-                        
-                        # Export discovered emails
-                        emails_csv = '\n'.join(result['emails_found'])
-                        st.download_button(
-                            label="📥 Download Email yang Ditemukan",
-                            data=emails_csv,
-                            file_name=f"discovered_emails_{domain_input.replace('https://', '').replace('http://', '').replace('/', '_')}_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.txt",
-                            mime="text/plain"
-                        )
-                    else:
-                        st.info("🔍 Tidak ada email yang ditemukan di halaman website")
-                    
-                    # Common patterns section
+                    # Handle pattern verification
                     if result['common_patterns'] and verify_patterns:
-                        st.subheader("🎯 Verifikasi Pola Email Umum")
-                        
                         with st.spinner("Memverifikasi pola email umum..."):
                             pattern_results = discovery.verify_email_patterns(
                                 result['common_patterns'], 
                                 validator
                             )
-                        
-                        # Pattern verification results
-                        if pattern_results['valid_emails']:
-                            st.success(f"✅ {len(pattern_results['valid_emails'])} pola email valid ditemukan!")
-                            
-                            valid_patterns_df = pd.DataFrame([
-                                {
-                                    'Email': r['email'],
-                                    'Status': 'Valid' if r['is_valid'] else 'Invalid',
-                                    'Confidence': f"{r['confidence']}%"
-                                }
-                                for r in pattern_results['valid_emails']
-                            ])
-                            
-                            st.dataframe(valid_patterns_df, use_container_width=True)
-                            
-                            # Export valid patterns
-                            valid_emails_text = '\n'.join([r['email'] for r in pattern_results['valid_emails']])
-                            st.download_button(
-                                label="📥 Download Email Valid",
-                                data=valid_emails_text,
-                                file_name=f"valid_emails_{domain_input.replace('https://', '').replace('http://', '').replace('/', '_')}_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.txt",
-                                mime="text/plain"
-                            )
-                        else:
-                            st.info("ℹ️ Tidak ada pola email umum yang valid ditemukan")
+                        st.session_state.pattern_verification = pattern_results
+                    else:
+                        st.session_state.pattern_verification = None
                     
-                    elif result['common_patterns'] and not verify_patterns:
-                        st.subheader("💡 Pola Email Umum (Belum Diverifikasi)")
-                        
-                        patterns_df = pd.DataFrame({
-                            'Email Pattern': result['common_patterns'],
-                            'Status': ['Belum Diverifikasi'] * len(result['common_patterns'])
-                        })
-                        
-                        st.dataframe(patterns_df, use_container_width=True)
-                        st.info("💡 Centang 'Verifikasi pola email umum' untuk memvalidasi email ini")
-                    
-                    # Scanned pages
-                    if result['pages_scanned']:
-                        with st.expander("📄 Halaman yang Di-scan"):
-                            for page in result['pages_scanned']:
-                                st.write(f"• {page}")
-                    
-                    # Store results in session state
-                    st.session_state.discovery_results = result
-                    if verify_patterns and result['common_patterns']:
-                        if 'pattern_results' in locals():
-                            st.session_state.pattern_verification = pattern_results
+                    st.success(f"✅ Pencarian selesai untuk {result['domain']}")
             
             elif submitted and not domain_input:
                 st.warning("⚠️ Silakan masukkan domain website")
+        
+        # Display results outside the form
+        if st.session_state.discovery_results:
+            result = st.session_state.discovery_results
+            
+            # Summary metrics
+            col_m1, col_m2, col_m3 = st.columns(3)
+            
+            with col_m1:
+                st.metric("Email Ditemukan", len(result['emails_found']))
+            
+            with col_m2:
+                st.metric("Halaman Di-scan", len(result['pages_scanned']))
+            
+            with col_m3:
+                st.metric("Pola Email", len(result['common_patterns']))
+            
+            # Discovered emails
+            if result['emails_found']:
+                st.subheader("📧 Email yang Ditemukan")
+                
+                emails_df = pd.DataFrame({
+                    'Email': result['emails_found'],
+                    'Status': ['Ditemukan'] * len(result['emails_found'])
+                })
+                
+                st.dataframe(emails_df, use_container_width=True)
+                
+                # Export discovered emails (outside form)
+                emails_csv = '\n'.join(result['emails_found'])
+                domain_clean = result['domain'].replace('https://', '').replace('http://', '').replace('/', '_')
+                st.download_button(
+                    label="📥 Download Email yang Ditemukan",
+                    data=emails_csv,
+                    file_name=f"discovered_emails_{domain_clean}_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                    mime="text/plain",
+                    key="download_discovered"
+                )
+            else:
+                st.info("🔍 Tidak ada email yang ditemukan di halaman website")
+            
+            # Pattern verification results
+            if st.session_state.pattern_verification:
+                pattern_results = st.session_state.pattern_verification
+                st.subheader("🎯 Verifikasi Pola Email Umum")
+                
+                if pattern_results['valid_emails']:
+                    st.success(f"✅ {len(pattern_results['valid_emails'])} pola email valid ditemukan!")
+                    
+                    valid_patterns_df = pd.DataFrame([
+                        {
+                            'Email': r['email'],
+                            'Status': 'Valid' if r['is_valid'] else 'Invalid',
+                            'Confidence': f"{r['confidence']}%"
+                        }
+                        for r in pattern_results['valid_emails']
+                    ])
+                    
+                    st.dataframe(valid_patterns_df, use_container_width=True)
+                    
+                    # Export valid patterns (outside form)
+                    valid_emails_text = '\n'.join([r['email'] for r in pattern_results['valid_emails']])
+                    domain_clean = result['domain'].replace('https://', '').replace('http://', '').replace('/', '_')
+                    st.download_button(
+                        label="📥 Download Email Valid",
+                        data=valid_emails_text,
+                        file_name=f"valid_emails_{domain_clean}_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                        mime="text/plain",
+                        key="download_valid_patterns"
+                    )
+                else:
+                    st.info("ℹ️ Tidak ada pola email umum yang valid ditemukan")
+            
+            elif result['common_patterns'] and st.session_state.pattern_verification is None:
+                st.subheader("💡 Pola Email Umum (Belum Diverifikasi)")
+                
+                patterns_df = pd.DataFrame({
+                    'Email Pattern': result['common_patterns'],
+                    'Status': ['Belum Diverifikasi'] * len(result['common_patterns'])
+                })
+                
+                st.dataframe(patterns_df, use_container_width=True)
+                st.info("💡 Centang 'Verifikasi pola email umum' untuk memvalidasi email ini")
+            
+            # Scanned pages
+            if result['pages_scanned']:
+                with st.expander("📄 Halaman yang Di-scan"):
+                    for page in result['pages_scanned']:
+                        st.write(f"• {page}")
     
     with col2:
         st.markdown("### Cara Kerja")
