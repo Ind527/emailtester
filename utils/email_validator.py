@@ -65,8 +65,11 @@ class EmailValidator:
                     result['error'] = f"SMTP check: {smtp_result['error']}"
                     result['confidence'] += 10  # Inconclusive
             
-            # Final validation decision
-            result['is_valid'] = result['confidence'] >= 75
+            # Final validation decision - SMTP verification must pass for email to be valid
+            if result['smtp_valid']:
+                result['is_valid'] = True
+            else:
+                result['is_valid'] = False
             
         except Exception as e:
             result['error'] = f"Validation error: {str(e)}"
