@@ -3,6 +3,7 @@ import requests
 import trafilatura
 from urllib.parse import urljoin, urlparse
 import time
+import random
 from typing import List, Dict, Set
 import dns.resolver
 import urllib3
@@ -28,18 +29,35 @@ class EmailDiscovery:
             '/help'
         ]
         
-        # Setup request session with proper headers
+        # Setup request session with comprehensive headers to avoid detection
         self.session = requests.Session()
         self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Language': 'en-US,en;q=0.5',
-            'Accept-Encoding': 'gzip, deflate',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept-Language': 'en-US,en;q=0.9,id;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
             'Connection': 'keep-alive',
             'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'Cache-Control': 'max-age=0',
+            'DNT': '1',
+            'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+            'Sec-Ch-Ua-Mobile': '?0',
+            'Sec-Ch-Ua-Platform': '"Windows"'
         })
         self.session.verify = False  # Handle SSL issues for some sites
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)  # Disable SSL warnings
+        
+        # Alternative user agents for rotation
+        self.user_agents = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:121.0) Gecko/20100101 Firefox/121.0',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15'
+        ]
         
     def discover_emails_from_domain(self, domain: str, max_pages: int = 5) -> Dict:
         """
@@ -56,40 +74,86 @@ class EmailDiscovery:
             'status': 'success'
         }
         
-        try:
-            # Check if domain is reachable with better method
-            response = self.session.get(domain, timeout=15, allow_redirects=True)
-            if response.status_code >= 400:
-                result['status'] = 'domain_unreachable'
-                result['error'] = f'HTTP {response.status_code}: {response.reason}'
-                return result
+        # Try multiple strategies to access the domain
+        access_successful = False
+        final_domain = domain
+        
+        strategies = [
+            {'method': 'GET', 'ua_rotate': False},
+            {'method': 'GET', 'ua_rotate': True},
+            {'method': 'HEAD', 'ua_rotate': True},
+        ]
+        
+        for strategy in strategies:
+            if access_successful:
+                break
                 
-        except requests.exceptions.SSLError:
-            # Try with HTTP if HTTPS fails
             try:
-                http_domain = domain.replace('https://', 'http://')
-                response = self.session.get(http_domain, timeout=15, allow_redirects=True)
-                if response.status_code >= 400:
-                    result['status'] = 'domain_unreachable'
-                    result['error'] = f'HTTP {response.status_code}: {response.reason}'
-                    return result
-                domain = http_domain  # Use HTTP version if HTTPS fails
-            except Exception as e:
+                # Add random delay to appear more human-like
+                time.sleep(random.uniform(1, 3))
+                
+                # Rotate user agent if requested
+                if strategy['ua_rotate']:
+                    self.session.headers['User-Agent'] = random.choice(self.user_agents)
+                
+                # Add referrer to look more natural
+                self.session.headers['Referer'] = 'https://www.google.com/'
+                
+                if strategy['method'] == 'HEAD':
+                    response = self.session.head(domain, timeout=15, allow_redirects=True)
+                else:
+                    response = self.session.get(domain, timeout=15, allow_redirects=True)
+                
+                if response.status_code == 200:
+                    access_successful = True
+                    final_domain = domain
+                    break
+                elif response.status_code == 403:
+                    # Try with different approach for 403
+                    continue
+                elif response.status_code >= 400:
+                    continue
+                else:
+                    access_successful = True
+                    final_domain = domain
+                    break
+                    
+            except requests.exceptions.SSLError:
+                # Try with HTTP if HTTPS fails
+                try:
+                    http_domain = domain.replace('https://', 'http://')
+                    time.sleep(random.uniform(1, 2))
+                    
+                    if strategy['method'] == 'HEAD':
+                        response = self.session.head(http_domain, timeout=15, allow_redirects=True)
+                    else:
+                        response = self.session.get(http_domain, timeout=15, allow_redirects=True)
+                    
+                    if response.status_code == 200 or (response.status_code < 400 and response.status_code >= 300):
+                        access_successful = True
+                        final_domain = http_domain
+                        break
+                except Exception:
+                    continue
+            except (requests.exceptions.Timeout, requests.exceptions.ConnectionError):
+                continue
+            except Exception:
+                continue
+        
+        if not access_successful:
+            # Final fallback - try to at least verify domain exists via DNS
+            try:
+                parsed_domain = urlparse(domain).netloc
+                dns.resolver.resolve(parsed_domain, 'A')
+                # Domain exists but website might be protected, continue with limited scan
+                result['error'] = 'Website protected by anti-bot measures, attempting limited scan'
+            except Exception:
                 result['status'] = 'domain_unreachable'
-                result['error'] = f'SSL Error and HTTP fallback failed: {str(e)}'
+                result['error'] = 'Domain not accessible - website may be down or blocking automated access'
                 return result
-        except requests.exceptions.Timeout:
-            result['status'] = 'domain_unreachable'
-            result['error'] = 'Connection timeout - domain took too long to respond'
-            return result
-        except requests.exceptions.ConnectionError:
-            result['status'] = 'domain_unreachable'
-            result['error'] = 'Connection failed - unable to reach domain'
-            return result
-        except Exception as e:
-            result['status'] = 'domain_unreachable'
-            result['error'] = f'Unexpected error: {str(e)}'
-            return result
+        
+        # Update domain to use the successful one
+        domain = final_domain
         
         pages_to_scan = []
         base_domain = urlparse(domain).netloc
@@ -99,16 +163,21 @@ class EmailDiscovery:
             page_url = urljoin(domain, page)
             pages_to_scan.append(page_url)
         
-        # Scan each page
-        for page_url in pages_to_scan:
+        # Scan each page with anti-detection measures
+        for i, page_url in enumerate(pages_to_scan):
             try:
+                # Add random delay between pages to appear human-like
+                if i > 0:
+                    time.sleep(random.uniform(2, 5))
+                
+                # Rotate user agent occasionally
+                if random.random() < 0.3:  # 30% chance to rotate
+                    self.session.headers['User-Agent'] = random.choice(self.user_agents)
+                
                 emails = self._extract_emails_from_page(page_url)
                 if emails:
                     result['emails_found'].update(emails)
                     result['pages_scanned'].append(page_url)
-                
-                # Add delay to be respectful
-                time.sleep(1)
                 
             except Exception as e:
                 continue
@@ -124,50 +193,70 @@ class EmailDiscovery:
     
     def _extract_emails_from_page(self, url: str) -> Set[str]:
         """
-        Extract emails from a single webpage
+        Extract emails from a single webpage with anti-detection measures
         """
         emails = set()
         
+        # Add referrer header to appear more natural
+        original_referer = self.session.headers.get('Referer')
+        parsed_url = urlparse(url)
+        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        self.session.headers['Referer'] = base_url
+        
         try:
-            # Try to fetch content using our configured session first
-            response = self.session.get(url, timeout=10, allow_redirects=True)
-            if response.status_code == 200:
-                # Extract emails from raw HTML
-                html_emails = self.email_pattern.findall(response.text)
-                emails.update(html_emails)
-                
-                # Use trafilatura for clean text extraction
-                text_content = trafilatura.extract(response.text)
-                if text_content:
-                    found_emails = self.email_pattern.findall(text_content)
-                    emails.update(found_emails)
-            else:
-                # Fallback to trafilatura's fetch method
-                downloaded = trafilatura.fetch_url(url)
-                if downloaded:
-                    text_content = trafilatura.extract(downloaded)
-                    if text_content:
-                        found_emails = self.email_pattern.findall(text_content)
-                        emails.update(found_emails)
+            # Try multiple methods to get content
+            methods = [
+                {'use_session': True, 'timeout': 10},
+                {'use_session': True, 'timeout': 15},
+                {'use_trafilatura': True}
+            ]
+            
+            for method in methods:
+                if emails:  # If we already found emails, don't try other methods
+                    break
                     
-                    # Also check raw HTML
-                    html_emails = self.email_pattern.findall(downloaded)
-                    emails.update(html_emails)
-                
-        except Exception as e:
-            # If our method fails, try trafilatura fallback
-            try:
-                downloaded = trafilatura.fetch_url(url)
-                if downloaded:
-                    text_content = trafilatura.extract(downloaded)
-                    if text_content:
-                        found_emails = self.email_pattern.findall(text_content)
-                        emails.update(found_emails)
+                try:
+                    if method.get('use_session'):
+                        response = self.session.get(url, timeout=method['timeout'], allow_redirects=True)
+                        if response.status_code == 200:
+                            # Extract emails from raw HTML
+                            html_emails = self.email_pattern.findall(response.text)
+                            emails.update(html_emails)
+                            
+                            # Use trafilatura for clean text extraction
+                            text_content = trafilatura.extract(response.text)
+                            if text_content:
+                                found_emails = self.email_pattern.findall(text_content)
+                                emails.update(found_emails)
+                        elif response.status_code == 403:
+                            # If we get 403, try different user agent
+                            old_ua = self.session.headers['User-Agent']
+                            self.session.headers['User-Agent'] = random.choice(self.user_agents)
+                            time.sleep(random.uniform(1, 3))
+                            continue
                     
-                    html_emails = self.email_pattern.findall(downloaded)
-                    emails.update(html_emails)
-            except:
-                pass
+                    elif method.get('use_trafilatura'):
+                        # Fallback to trafilatura's fetch method
+                        downloaded = trafilatura.fetch_url(url)
+                        if downloaded:
+                            text_content = trafilatura.extract(downloaded)
+                            if text_content:
+                                found_emails = self.email_pattern.findall(text_content)
+                                emails.update(found_emails)
+                            
+                            # Also check raw HTML
+                            html_emails = self.email_pattern.findall(downloaded)
+                            emails.update(html_emails)
+                    
+                except Exception:
+                    continue
+                    
+        except Exception:
+            pass
+        finally:
+            # Restore original referer
+            if original_referer:
+                self.session.headers['Referer'] = original_referer
         
         # Filter out common false positives
         filtered_emails = set()
