@@ -4,6 +4,8 @@ import os
 from utils.email_validator import EmailValidator
 from utils.email_sender import EmailSender
 import time
+import base64
+from pathlib import Path
 
 # Configure page
 st.set_page_config(
@@ -13,6 +15,70 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Load custom CSS
+def load_custom_css():
+    css_file = Path("static/style.css")
+    if css_file.exists():
+        with open(css_file) as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+    
+    # Additional inline styles
+    st.markdown("""
+    <style>
+    .main-header {
+        text-align: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .feature-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        margin: 1rem 0;
+        border-left: 4px solid #667eea;
+        transition: all 0.3s ease;
+    }
+    .feature-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .stats-container {
+        display: flex;
+        justify-content: space-around;
+        margin: 2rem 0;
+    }
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        min-width: 150px;
+    }
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Load custom JavaScript
+def load_custom_js():
+    js_file = Path("static/script.js")
+    if js_file.exists():
+        with open(js_file) as f:
+            st.markdown(f"<script>{f.read()}</script>", unsafe_allow_html=True)
+
 # Initialize session state
 if 'email_credentials' not in st.session_state:
     st.session_state.email_credentials = {}
@@ -20,27 +86,57 @@ if 'validated_emails' not in st.session_state:
     st.session_state.validated_emails = pd.DataFrame()
 
 def main():
-    st.title("📧 Email Validation & Bulk Sender Tool")
-    st.markdown("---")
+    # Load custom styling
+    load_custom_css()
+    load_custom_js()
     
-    # Sidebar for navigation
-    st.sidebar.title("Navigation")
+    # Modern header
+    st.markdown("""
+    <div class="main-header">
+        <h1 style="color: white; font-size: 3rem; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+            📧 Email Tool Professional
+        </h1>
+        <p style="color: rgba(255,255,255,0.9); font-size: 1.2rem; margin: 0.5rem 0 0 0;">
+            Solusi lengkap untuk validasi dan pengiriman email massal
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Modern sidebar navigation
+    st.sidebar.markdown("""
+    <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 12px; margin-bottom: 1rem;">
+        <h2 style="color: white; margin: 0; font-size: 1.5rem;">🚀 Navigasi</h2>
+        <p style="color: rgba(255,255,255,0.8); margin: 0.5rem 0 0 0; font-size: 0.9rem;">Pilih fitur yang ingin digunakan</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
     page = st.sidebar.selectbox(
-        "Choose a feature:",
-        ["Single Email Validation", "Bulk Email Validation", "Email Discovery", "Email Sender", "Scheduled Emails"]
+        "Pilih fitur:",
+        ["Single Email Validation", "Bulk Email Validation", "Email Discovery", "Email Sender", "Scheduled Emails"],
+        format_func=lambda x: {
+            "Single Email Validation": "🔍 Validasi Email Tunggal",
+            "Bulk Email Validation": "📋 Validasi Email Massal", 
+            "Email Discovery": "🕵️ Pencarian Email",
+            "Email Sender": "📤 Pengirim Email",
+            "Scheduled Emails": "⏰ Email Terjadwal"
+        }.get(x, x)
     )
     
-    # Email credentials sidebar
-    st.sidebar.markdown("---")
-    st.sidebar.subheader("📧 Email Configuration")
+    # Modern email credentials sidebar
+    st.sidebar.markdown("""
+    <div style="margin: 1.5rem 0; padding: 1rem; background: rgba(102, 126, 234, 0.1); border-radius: 12px; border-left: 4px solid #667eea;">
+        <h3 style="color: #667eea; margin: 0 0 0.5rem 0; font-size: 1.2rem;">📧 Konfigurasi Email</h3>
+        <p style="color: #666; margin: 0; font-size: 0.85rem;">Atur kredensial SMTP untuk mengirim email</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    with st.sidebar.expander("SMTP Settings", expanded=False):
-        smtp_server = st.text_input("SMTP Server", value="smtp.gmail.com", key="smtp_server")
-        smtp_port = st.number_input("SMTP Port", value=587, key="smtp_port")
-        email_address = st.text_input("Your Email Address", key="email_address")
-        email_password = st.text_input("Email Password/App Password", type="password", key="email_password")
+    with st.sidebar.expander("⚙️ Pengaturan SMTP", expanded=False):
+        smtp_server = st.text_input("🌐 Server SMTP", value="smtp.gmail.com", key="smtp_server", help="Masukkan server SMTP provider email Anda")
+        smtp_port = st.number_input("🔌 Port SMTP", value=587, key="smtp_port", help="Port standar untuk Gmail: 587")
+        email_address = st.text_input("📧 Alamat Email Anda", key="email_address", help="Email yang akan digunakan untuk mengirim")
+        email_password = st.text_input("🔒 Password/App Password", type="password", key="email_password", help="Gunakan App Password untuk Gmail")
         
-        if st.button("Save Email Configuration"):
+        if st.button("💾 Simpan Konfigurasi Email", type="primary"):
             if email_address and email_password:
                 st.session_state.email_credentials = {
                     'smtp_server': smtp_server,
@@ -48,9 +144,9 @@ def main():
                     'email': email_address,
                     'password': email_password
                 }
-                st.success("✅ Email configuration saved!")
+                st.success("✅ Konfigurasi email berhasil disimpan!")
             else:
-                st.error("❌ Please fill in all email fields")
+                st.error("❌ Mohon lengkapi semua field email")
     
     # Main content based on selected page
     if page == "Single Email Validation":
@@ -67,8 +163,12 @@ def main():
         scheduled_emails_page()
 
 def single_email_validation():
-    st.header("🔍 Single Email Validation")
-    st.markdown("Validate individual email addresses for syntax, domain, and deliverability.")
+    st.markdown("""
+    <div class="feature-card">
+        <h2 style="color: #667eea; margin-top: 0;">🔍 Validasi Email Tunggal</h2>
+        <p style="color: #666; margin-bottom: 0;">Validasi alamat email untuk sintaks, domain, dan deliverability.</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     col1, col2 = st.columns([2, 1])
     
@@ -85,47 +185,77 @@ def single_email_validation():
                     with st.spinner("Validating email..."):
                         result = validator.validate_single_email(email_to_validate)
                     
-                    # Display simple results
+                    # Display results with modern styling
                     if result['is_valid']:
-                        st.success(f"✅ **{email_to_validate}** valid")
+                        st.markdown(f"""
+                        <div style="background: linear-gradient(135deg, #48bb78, #38a169); color: white; padding: 1rem; border-radius: 12px; margin: 1rem 0;">
+                            <h3 style="margin: 0; color: white;">✅ Email Valid!</h3>
+                            <p style="margin: 0.5rem 0 0 0; opacity: 0.9;"><strong>{email_to_validate}</strong> dapat menerima email</p>
+                        </div>
+                        """, unsafe_allow_html=True)
                     else:
-                        st.error(f"❌ **{email_to_validate}** invalid")
+                        st.markdown(f"""
+                        <div style="background: linear-gradient(135deg, #f56565, #e53e3e); color: white; padding: 1rem; border-radius: 12px; margin: 1rem 0;">
+                            <h3 style="margin: 0; color: white;">❌ Email Tidak Valid</h3>
+                            <p style="margin: 0.5rem 0 0 0; opacity: 0.9;"><strong>{email_to_validate}</strong> tidak dapat menerima email</p>
+                        </div>
+                        """, unsafe_allow_html=True)
                 else:
-                    st.warning("Please enter an email address to validate.")
+                    st.markdown("""
+                    <div style="background: #fed7d7; color: #c53030; padding: 1rem; border-radius: 8px; border-left: 4px solid #f56565;">
+                        ⚠️ Mohon masukkan alamat email untuk divalidasi.
+                    </div>
+                    """, unsafe_allow_html=True)
     
     with col2:
-        st.markdown("### Validation Features")
-        st.info("""
-        **What we check:**
-        
-        🔤 **Syntax Validation**
-        - Email format compliance
-        - Special character handling
-        
-        🌐 **Domain Verification**
-        - Domain existence check
-        - DNS record validation
-        
-        📬 **MX Record Check**
-        - Mail server availability
-        - Priority validation
-        
-        🔌 **SMTP Verification**
-        - Mailbox existence
-        - Deliverability test
-        """)
+        st.markdown("""
+        <div class="feature-card">
+            <h3 style="color: #667eea; margin-top: 0;">✨ Fitur Validasi</h3>
+            <div style="padding: 1rem 0;">
+                <div style="margin: 1rem 0; padding: 0.5rem; background: #f8f9ff; border-radius: 8px;">
+                    <strong>🔤 Validasi Sintaks</strong><br>
+                    <small>Format email dan karakter khusus</small>
+                </div>
+                <div style="margin: 1rem 0; padding: 0.5rem; background: #f8f9ff; border-radius: 8px;">
+                    <strong>🌐 Verifikasi Domain</strong><br>
+                    <small>Keberadaan domain dan DNS</small>
+                </div>
+                <div style="margin: 1rem 0; padding: 0.5rem; background: #f8f9ff; border-radius: 8px;">
+                    <strong>📬 Cek MX Record</strong><br>
+                    <small>Ketersediaan mail server</small>
+                </div>
+                <div style="margin: 1rem 0; padding: 0.5rem; background: #f8f9ff; border-radius: 8px;">
+                    <strong>🔌 Verifikasi SMTP</strong><br>
+                    <small>Keberadaan mailbox</small>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 
 def email_sender_page():
-    st.header("📤 Email Sender")
-    st.markdown("Compose and send emails individually or in bulk.")
+    st.markdown("""
+    <div class="feature-card">
+        <h2 style="color: #667eea; margin-top: 0;">📤 Pengirim Email Massal</h2>
+        <p style="color: #666; margin-bottom: 0;">Buat dan kirim email secara individual atau massal dengan tampilan profesional.</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     if not st.session_state.email_credentials:
-        st.warning("⚠️ Please configure your email credentials in the sidebar first.")
+        st.markdown("""
+        <div style="background: #fed7d7; color: #c53030; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #f56565; margin: 1rem 0;">
+            <h3 style="margin: 0 0 0.5rem 0; color: #c53030;">⚠️ Konfigurasi Diperlukan</h3>
+            <p style="margin: 0;">Mohon konfigurasikan kredensial email Anda di sidebar terlebih dahulu untuk menggunakan fitur ini.</p>
+        </div>
+        """, unsafe_allow_html=True)
         return
     
-    # Email composition
-    st.subheader("✍️ Compose Email")
+    # Modern email composition header
+    st.markdown("""
+    <div class="feature-card">
+        <h3 style="color: #667eea; margin-top: 0;">✍️ Tulis Email</h3>
+    </div>
+    """, unsafe_allow_html=True)
     
     col1, col2 = st.columns([2, 1])
     
@@ -191,14 +321,40 @@ def email_sender_page():
                 st.info(f"Email will be sent on: {scheduled_time.strftime('%Y-%m-%d %H:%M:%S')}")
     
     with col2:
-        st.markdown("### Email Statistics")
-        if recipients:
-            st.metric("Recipients", len(recipients))
-            st.metric("Subject Length", len(subject) if subject else 0)
-            st.metric("Message Length", len(message) if message else 0)
+        st.markdown("""
+        <div class="feature-card">
+            <h3 style="color: #667eea; margin-top: 0;">📊 Statistik Email</h3>
+        </div>
+        """, unsafe_allow_html=True)
         
-        st.markdown("### Send Status")
+        if recipients:
+            st.markdown(f"""
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-number">{len(recipients)}</div>
+                    <div class="stat-label">Penerima</div>
+                </div>
+            </div>
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-number">{len(subject) if subject else 0}</div>
+                    <div class="stat-label">Karakter Subjek</div>
+                </div>
+            </div>
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-number">{len(message) if message else 0}</div>
+                    <div class="stat-label">Karakter Pesan</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        
         if 'last_send_status' in st.session_state:
+            st.markdown("""
+            <div class="feature-card">
+                <h4 style="color: #667eea; margin-top: 0;">Status Pengiriman Terakhir</h4>
+            </div>
+            """, unsafe_allow_html=True)
             st.json(st.session_state.last_send_status)
     
     # Send button
@@ -212,15 +368,22 @@ def email_sender_page():
                 
                 st.session_state.last_send_status = results
                 
-                # Show results
+                # Show results with modern design
                 successful = sum(1 for r in results if r['success'])
                 failed = len(results) - successful
                 
-                col1_result, col2_result = st.columns(2)
-                with col1_result:
-                    st.success(f"✅ Successfully sent: {successful}")
-                with col2_result:
-                    st.error(f"❌ Failed to send: {failed}")
+                st.markdown(f"""
+                <div class="stats-container">
+                    <div class="stat-card" style="border-left: 4px solid #48bb78;">
+                        <div class="stat-number" style="color: #48bb78;">{successful}</div>
+                        <div class="stat-label">✅ Berhasil Dikirim</div>
+                    </div>
+                    <div class="stat-card" style="border-left: 4px solid #f56565;">
+                        <div class="stat-number" style="color: #f56565;">{failed}</div>
+                        <div class="stat-label">❌ Gagal Dikirim</div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
                 
                 # Detailed results
                 if failed > 0:
