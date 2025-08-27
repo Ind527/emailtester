@@ -5,7 +5,7 @@ from datetime import datetime
 import json
 
 def show_scheduled_emails():
-    st.header("⏰ Scheduled Email Management")
+    st.header("Scheduled Email Management")
     st.markdown("View, manage, and monitor your scheduled email campaigns.")
     
     scheduler = get_scheduler()
@@ -14,11 +14,11 @@ def show_scheduled_emails():
     col1, col2, col3 = st.columns([1, 1, 2])
     
     with col1:
-        if st.button("🔄 Refresh"):
+        if st.button("Refresh"):
             st.rerun()
     
     with col2:
-        if st.button("🧹 Clear Completed"):
+        if st.button("Clear Completed"):
             scheduler.clear_completed_jobs()
             st.success("Completed jobs cleared!")
             st.rerun()
@@ -27,10 +27,10 @@ def show_scheduled_emails():
     jobs = scheduler.get_scheduled_jobs()
     
     if not jobs:
-        st.info("📭 No scheduled emails found.")
+        st.info("No scheduled emails found.")
         
         # Quick scheduling section
-        st.subheader("⚡ Quick Schedule")
+        st.subheader("Quick Schedule")
         st.markdown("Go to the **Email Sender** page to create new scheduled emails.")
         
         return
@@ -39,7 +39,7 @@ def show_scheduled_emails():
     show_job_statistics(jobs)
     
     # Jobs management interface
-    st.subheader("📋 Scheduled Jobs")
+    st.subheader("Scheduled Jobs")
     
     # Filter options
     status_filter = st.selectbox(
@@ -61,7 +61,7 @@ def show_scheduled_emails():
 
 def show_job_statistics(jobs):
     """Display job statistics overview"""
-    st.subheader("📊 Overview")
+    st.subheader("Overview")
     
     # Calculate statistics
     total_jobs = len(jobs)
@@ -74,19 +74,19 @@ def show_job_statistics(jobs):
     col1, col2, col3, col4, col5 = st.columns(5)
     
     with col1:
-        st.metric("📧 Total Jobs", total_jobs)
+        st.metric("Total Jobs", total_jobs)
     
     with col2:
-        st.metric("⏳ Pending", pending_jobs)
+        st.metric("Pending", pending_jobs)
     
     with col3:
-        st.metric("✅ Completed", completed_jobs)
+        st.metric("Completed", completed_jobs)
     
     with col4:
-        st.metric("❌ Failed", failed_jobs)
+        st.metric("Failed", failed_jobs)
     
     with col5:
-        st.metric("⏸️ Cancelled", cancelled_jobs)
+        st.metric("Cancelled", cancelled_jobs)
     
     # Success rate
     if completed_jobs > 0:
@@ -95,21 +95,21 @@ def show_job_statistics(jobs):
         
         if total_emails_attempted > 0:
             success_rate = (total_emails_sent / total_emails_attempted) * 100
-            st.metric("📈 Overall Success Rate", f"{success_rate:.1f}%")
+            st.metric("Overall Success Rate", f"{success_rate:.1f}%")
 
 def display_job_card(job, scheduler):
     """Display individual job card"""
     
     # Status emoji mapping
-    status_emojis = {
-        'pending': '⏳',
-        'sending': '📤',
-        'completed': '✅',
-        'failed': '❌',
-        'cancelled': '⏸️'
+    status_icons = {
+        'pending': '<i class="fas fa-clock"></i>',
+        'sending': '<i class="fas fa-paper-plane"></i>',
+        'completed': '<i class="fas fa-check-circle"></i>',
+        'failed': '<i class="fas fa-times-circle"></i>',
+        'cancelled': '<i class="fas fa-pause-circle"></i>'
     }
     
-    status_emoji = status_emojis.get(job['status'], '❓')
+    status_icon = status_icons.get(job['status'], '<i class="fas fa-question-circle"></i>')
     
     # Job card container
     with st.container():
@@ -117,7 +117,7 @@ def display_job_card(job, scheduler):
         col1, col2, col3 = st.columns([3, 1, 1])
         
         with col1:
-            st.markdown(f"### {status_emoji} {job['subject']}")
+            st.markdown(f"### {status_icon} {job['subject']}", unsafe_allow_html=True)
             st.caption(f"Job ID: {job['id']}")
         
         with col2:
@@ -125,7 +125,7 @@ def display_job_card(job, scheduler):
         
         with col3:
             if job['status'] == 'pending':
-                if st.button(f"❌ Cancel", key=f"cancel_{job['id']}"):
+                if st.button(f"Cancel", key=f"cancel_{job['id']}"):
                     if scheduler.cancel_job(job['id']):
                         st.success("Job cancelled!")
                         st.rerun()
@@ -153,7 +153,7 @@ def display_job_card(job, scheduler):
                 st.write(f"**Error:** {job.get('error', 'Unknown error')}")
         
         # Expandable details
-        with st.expander(f"📋 Details for Job {job['id']}", expanded=False):
+        with st.expander(f"Details for Job {job['id']}", expanded=False):
             
             # Email content preview
             st.markdown("**Email Preview:**")
@@ -182,12 +182,12 @@ def display_job_card(job, scheduler):
                 success_count = results_df['success'].sum()
                 total_count = len(results_df)
                 
-                st.write(f"✅ Successful: {success_count}/{total_count}")
+                st.write(f"Successful: {success_count}/{total_count}")
                 
                 # Show failed sends
                 failed_results = results_df[results_df['success'] == False]
                 if not failed_results.empty:
-                    st.write("❌ **Failed sends:**")
+                    st.write("**Failed sends:**")
                     for _, failed in failed_results.iterrows():
                         st.write(f"  - {failed['recipient']}: {failed.get('error', 'Unknown error')}")
             
@@ -213,12 +213,12 @@ def format_datetime(datetime_str):
 
 def show_job_logs():
     """Show detailed logs for job execution"""
-    st.subheader("📜 Job Execution Logs")
+    st.subheader("Job Execution Logs")
     
     # This could be expanded to show more detailed logs
     # For now, we'll just show basic information
     
-    if st.button("📥 Download Job History"):
+    if st.button("Download Job History"):
         scheduler = get_scheduler()
         jobs = scheduler.get_scheduled_jobs()
         
@@ -234,7 +234,7 @@ def show_job_logs():
             csv_data = export_df.to_csv(index=False)
             
             st.download_button(
-                label="📥 Download CSV",
+                label="Download CSV",
                 data=csv_data,
                 file_name=f"scheduled_jobs_history_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.csv",
                 mime="text/csv"

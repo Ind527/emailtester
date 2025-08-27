@@ -6,7 +6,7 @@ import time
 
 
 def show_email_discovery():
-    st.header("🔍 Email Discovery")
+    st.header("Email Discovery")
     st.markdown("Temukan alamat email dari domain website seperti hunter.io")
     
     # Initialize session state for discovery results
@@ -21,7 +21,7 @@ def show_email_discovery():
         # Domain input method selection
         input_method = st.radio(
             "Pilih metode input domain:",
-            ["📝 Single Domain", "📄 Multiple Domains (Text)", "📁 Upload CSV File"],
+            ["Single Domain", "Multiple Domains (Text)", "Upload CSV File"],
             horizontal=True
         )
         
@@ -29,7 +29,7 @@ def show_email_discovery():
         with st.form("domain_discovery_form"):
             domains_to_scan = []
             
-            if input_method == "📝 Single Domain":
+            if input_method == "Single Domain":
                 domain_input = st.text_input(
                     "Masukkan domain website:",
                     placeholder="contoh: github.com atau https://github.com"
@@ -37,7 +37,7 @@ def show_email_discovery():
                 if domain_input:
                     domains_to_scan = [domain_input.strip()]
             
-            elif input_method == "📄 Multiple Domains (Text)":
+            elif input_method == "Multiple Domains (Text)":
                 domains_text = st.text_area(
                     "Masukkan domain (satu per baris):",
                     height=150,
@@ -46,7 +46,7 @@ def show_email_discovery():
                 if domains_text:
                     domains_to_scan = [domain.strip() for domain in domains_text.split('\n') if domain.strip()]
             
-            elif input_method == "📁 Upload CSV File":
+            elif input_method == "Upload CSV File":
                 csv_file = st.file_uploader("Upload CSV dengan domain", type=['csv'], key="domain_csv")
                 if csv_file:
                     try:
@@ -72,7 +72,7 @@ def show_email_discovery():
             with col_settings2:
                 verify_patterns = st.checkbox("Verifikasi pola email umum", value=True)
             
-            submitted = st.form_submit_button("🔍 Mulai Pencarian", type="primary")
+            submitted = st.form_submit_button("Mulai Pencarian", type="primary")
             
             if submitted and domains_to_scan:
                 discovery = EmailDiscovery()
@@ -94,7 +94,7 @@ def show_email_discovery():
                         result = discovery.discover_emails_from_domain(domain, max_pages)
                     
                     if result['status'] == 'domain_unreachable':
-                        st.warning(f"⚠️ Domain {domain} tidak dapat diakses: {result.get('error', 'Unknown error')}")
+                        st.warning(f"Domain {domain} tidak dapat diakses: {result.get('error', 'Unknown error')}")
                         result['processed'] = False
                     else:
                         result['processed'] = True
@@ -129,11 +129,11 @@ def show_email_discovery():
                     'successful_domains': sum(1 for r in all_results if r.get('processed', False))
                 }
                 
-                status_text.success(f"✅ Selesai memproses {len(domains_to_scan)} domain!")
+                status_text.success(f"Selesai memproses {len(domains_to_scan)} domain!")
                 progress_bar.progress(1.0)
             
             elif submitted and not domains_to_scan:
-                st.warning("⚠️ Silakan masukkan domain website")
+                st.warning("Silakan masukkan domain website")
         
         # Display results outside the form
         if st.session_state.discovery_results:
@@ -142,7 +142,7 @@ def show_email_discovery():
             # Check if this is single domain (old format) or multiple domains (new format)
             if 'all_results' in results_data:
                 # Multiple domains format
-                st.subheader("📊 Ringkasan Hasil")
+                st.subheader("Ringkasan Hasil")
                 
                 # Summary metrics
                 col_m1, col_m2, col_m3, col_m4 = st.columns(4)
@@ -161,7 +161,7 @@ def show_email_discovery():
                 
                 # All discovered emails
                 if results_data['all_emails_found']:
-                    st.subheader("📧 Semua Email yang Ditemukan")
+                    st.subheader("Semua Email yang Ditemukan")
                     
                     # Create detailed DataFrame with source domain
                     detailed_emails = []
@@ -181,7 +181,7 @@ def show_email_discovery():
                         # Export all discovered emails
                         all_emails_text = '\n'.join(results_data['all_emails_found'])
                         st.download_button(
-                            label="📥 Download Semua Email yang Ditemukan",
+                            label="Download Semua Email yang Ditemukan",
                             data=all_emails_text,
                             file_name=f"all_discovered_emails_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.txt",
                             mime="text/plain",
@@ -190,7 +190,7 @@ def show_email_discovery():
                 
                 # All valid pattern emails
                 if results_data['all_pattern_results']:
-                    st.subheader("🎯 Semua Email Valid Pattern")
+                    st.subheader("Semua Email Valid Pattern")
                     
                     valid_patterns_df = pd.DataFrame([
                         {
@@ -206,7 +206,7 @@ def show_email_discovery():
                     # Export all valid patterns
                     valid_emails_text = '\n'.join([r['email'] for r in results_data['all_pattern_results']])
                     st.download_button(
-                        label="📥 Download Semua Email Valid Pattern",
+                        label="Download Semua Email Valid Pattern",
                         data=valid_emails_text,
                         file_name=f"all_valid_pattern_emails_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.txt",
                         mime="text/plain",
@@ -214,10 +214,10 @@ def show_email_discovery():
                     )
                 
                 # Per-domain breakdown
-                st.subheader("🌐 Detail per Domain")
+                st.subheader("Detail per Domain")
                 
                 for i, result in enumerate(results_data['all_results']):
-                    with st.expander(f"Domain: {result['domain']} ({'✅ Berhasil' if result.get('processed') else '❌ Gagal'})", expanded=False):
+                    with st.expander(f"Domain: {result['domain']} ({'Berhasil' if result.get('processed') else 'Gagal'})", expanded=False):
                         if result.get('processed'):
                             col1, col2, col3 = st.columns(3)
                             
@@ -266,7 +266,7 @@ def show_email_discovery():
                 # [Rest of single domain display logic remains the same...]
                 # Discovered emails
                 if result['emails_found']:
-                    st.subheader("📧 Email yang Ditemukan")
+                    st.subheader("Email yang Ditemukan")
                     
                     emails_df = pd.DataFrame({
                         'Email': result['emails_found'],
@@ -279,7 +279,7 @@ def show_email_discovery():
                     emails_csv = '\n'.join(result['emails_found'])
                     domain_clean = result['domain'].replace('https://', '').replace('http://', '').replace('/', '_')
                     st.download_button(
-                        label="📥 Download Email yang Ditemukan",
+                        label="Download Email yang Ditemukan",
                         data=emails_csv,
                         file_name=f"discovered_emails_{domain_clean}_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.txt",
                         mime="text/plain",
@@ -291,18 +291,18 @@ def show_email_discovery():
         st.info("""
         **Fitur Email Discovery:**
         
-        🌐 **Scan Website**
+        **Scan Website**
         - Menjelajahi halaman utama
         - Halaman contact, about, team
         - Mengekstrak email otomatis
         
-        🎯 **Pola Email Umum**
+        **Pola Email Umum**
         - info@domain.com
         - contact@domain.com
         - sales@domain.com
         - support@domain.com
         
-        ✅ **Verifikasi Real-time**
+        **Verifikasi Real-time**
         - Validasi syntax email
         - Cek keberadaan domain
         - Verifikasi SMTP server
@@ -310,7 +310,7 @@ def show_email_discovery():
         
         st.markdown("### Tips Penggunaan")
         st.success("""
-        💡 **Tips:**
+        **Tips:**
         
         • Gunakan domain lengkap (tanpa 'www')
         • Scan maksimal 5-10 halaman

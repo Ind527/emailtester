@@ -4,19 +4,19 @@ from utils.email_validator import EmailValidator
 import time
 
 def show_bulk_validation():
-    st.header("📋 Bulk Email Validation")
+    st.header("Bulk Email Validation")
     st.markdown("Validate multiple email addresses at once using CSV upload or direct paste.")
     
     # Input method selection
     input_method = st.radio(
         "Choose input method:",
-        ["📄 Upload CSV File", "📝 Paste Email Addresses"],
+        ["Upload CSV File", "Paste Email Addresses"],
         horizontal=True
     )
     
     emails_to_validate = []
     
-    if input_method == "📄 Upload CSV File":
+    if input_method == "Upload CSV File":
         # File upload section
         uploaded_file = st.file_uploader(
             "Choose a CSV file",
@@ -29,11 +29,11 @@ def show_bulk_validation():
                 # Read CSV file
                 df = pd.read_csv(uploaded_file)
                 
-                st.subheader("📊 Data Preview")
+                st.subheader("Data Preview")
                 st.dataframe(df.head(10), use_container_width=True)
                 
                 # Column selection
-                st.subheader("🎯 Select Email Column")
+                st.subheader("Select Email Column")
                 email_column = st.selectbox(
                     "Which column contains the email addresses?",
                     df.columns,
@@ -55,9 +55,9 @@ def show_bulk_validation():
                 st.error(f"Error reading CSV file: {str(e)}")
                 st.info("Make sure your CSV file is properly formatted and contains email addresses")
     
-    elif input_method == "📝 Paste Email Addresses":
+    elif input_method == "Paste Email Addresses":
         # Direct paste section
-        st.subheader("📝 Paste Email Addresses")
+        st.subheader("Paste Email Addresses")
         
         email_text = st.text_area(
             "Enter email addresses (one per line):",
@@ -80,7 +80,7 @@ def show_bulk_validation():
     
     # Validation settings (common for both methods)
     if emails_to_validate:
-        st.subheader("⚙️ Validation Settings")
+        st.subheader("Validation Settings")
         col1, col2 = st.columns(2)
         
         with col1:
@@ -100,7 +100,7 @@ def show_bulk_validation():
             )
         
         # Start validation
-        if st.button("🚀 Start Validation", type="primary"):
+        if st.button("Start Validation", type="primary"):
             if emails_to_validate:
                 validate_emails(emails_to_validate, skip_smtp, batch_size)
             else:
@@ -159,7 +159,7 @@ def validate_emails(emails, skip_smtp, batch_size):
             show_validation_results(all_results, results_container)
     
     # Final results
-    status_text.success(f"✅ Validation completed! Processed {len(all_results)} emails.")
+    status_text.success(f"Validation completed! Processed {len(all_results)} emails.")
     show_validation_results(all_results, results_container, final=True)
 
 def show_validation_results(results, container, final=False):
@@ -167,7 +167,7 @@ def show_validation_results(results, container, final=False):
     
     with container:
         if final:
-            st.subheader("📊 Final Validation Results")
+            st.subheader("Final Validation Results")
         
         # Convert to DataFrame
         results_df = pd.DataFrame(results)
@@ -180,14 +180,14 @@ def show_validation_results(results, container, final=False):
         avg_confidence = results_df['confidence'].mean()
         syntax_valid = results_df['syntax_valid'].sum()
         
-        col1.metric("✅ Valid Emails", valid_count, f"{valid_count/len(results_df)*100:.1f}%")
-        col2.metric("❌ Invalid Emails", invalid_count, f"{invalid_count/len(results_df)*100:.1f}%")
-        col3.metric("📊 Avg Confidence", f"{avg_confidence:.1f}%")
-        col4.metric("✏️ Syntax Valid", syntax_valid, f"{syntax_valid/len(results_df)*100:.1f}%")
+        col1.metric("Valid Emails", valid_count, f"{valid_count/len(results_df)*100:.1f}%")
+        col2.metric("Invalid Emails", invalid_count, f"{invalid_count/len(results_df)*100:.1f}%")
+        col3.metric("Avg Confidence", f"{avg_confidence:.1f}%")
+        col4.metric("Syntax Valid", syntax_valid, f"{syntax_valid/len(results_df)*100:.1f}%")
         
         # Filter options
         if final:
-            st.subheader("🔍 Filter Results")
+            st.subheader("Filter Results")
             filter_option = st.selectbox(
                 "Show emails:",
                 ["All emails", "Valid emails only", "Invalid emails only", "High confidence (>80%)", "Low confidence (<50%)"]
@@ -218,7 +218,7 @@ def show_validation_results(results, container, final=False):
         
         if final:
             # Export options
-            st.subheader("📥 Export Results")
+            st.subheader("Export Results")
             
             col1, col2 = st.columns(2)
             
@@ -231,15 +231,15 @@ def show_validation_results(results, container, final=False):
                 valid_csv = valid_emails_series.to_csv(index=False, header=True)
                 
                 st.download_button(
-                    label="📥 Download Valid Emails (CSV)",
+                    label="Download Valid Emails (CSV)",
                     data=valid_csv,
                     file_name=f"valid_emails_{pd.Timestamp.now().strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv"
                 )
                 
-                st.info(f"✅ {len(valid_emails_df)} valid emails ready for download (invalid emails excluded)")
+                st.info(f"{len(valid_emails_df)} valid emails ready for download (invalid emails excluded)")
             else:
-                st.info("❌ No valid emails found to export")
+                st.info("No valid emails found to export")
 
 if __name__ == "__main__":
     show_bulk_validation()

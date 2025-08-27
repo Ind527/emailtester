@@ -10,7 +10,7 @@ from pathlib import Path
 # Configure page
 st.set_page_config(
     page_title="Email Validation & Bulk Sender",
-    page_icon="📧",
+    page_icon="✉",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -22,8 +22,9 @@ def load_custom_css():
         with open(css_file) as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     
-    # Additional inline styles
+    # Load Font Awesome
     st.markdown("""
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
     .main-header {
         text-align: center;
@@ -94,7 +95,7 @@ def main():
     st.markdown("""
     <div class="main-header">
         <h1 style="color: white; font-size: 3rem; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
-            📧 Email Tool Professional
+            <i class="fas fa-envelope" style="margin-right: 0.5rem;"></i>Email Tool Professional
         </h1>
         <p style="color: rgba(255,255,255,0.9); font-size: 1.2rem; margin: 0.5rem 0 0 0;">
             Solusi lengkap untuk validasi dan pengiriman email massal
@@ -105,7 +106,7 @@ def main():
     # Modern sidebar navigation
     st.sidebar.markdown("""
     <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 12px; margin-bottom: 1rem;">
-        <h2 style="color: white; margin: 0; font-size: 1.5rem;">🚀 Navigasi</h2>
+        <h2 style="color: white; margin: 0; font-size: 1.5rem;"><i class="fas fa-rocket" style="margin-right: 0.5rem;"></i>Navigasi</h2>
         <p style="color: rgba(255,255,255,0.8); margin: 0.5rem 0 0 0; font-size: 0.9rem;">Pilih fitur yang ingin digunakan</p>
     </div>
     """, unsafe_allow_html=True)
@@ -114,29 +115,29 @@ def main():
         "Pilih fitur:",
         ["Single Email Validation", "Bulk Email Validation", "Email Discovery", "Email Sender", "Scheduled Emails"],
         format_func=lambda x: {
-            "Single Email Validation": "🔍 Validasi Email Tunggal",
-            "Bulk Email Validation": "📋 Validasi Email Massal", 
-            "Email Discovery": "🕵️ Pencarian Email",
-            "Email Sender": "📤 Pengirim Email",
-            "Scheduled Emails": "⏰ Email Terjadwal"
+            "Single Email Validation": "Validasi Email Tunggal",
+            "Bulk Email Validation": "Validasi Email Massal", 
+            "Email Discovery": "Pencarian Email",
+            "Email Sender": "Pengirim Email",
+            "Scheduled Emails": "Email Terjadwal"
         }.get(x, x)
     )
     
     # Modern email credentials sidebar
     st.sidebar.markdown("""
     <div style="margin: 1.5rem 0; padding: 1rem; background: rgba(102, 126, 234, 0.1); border-radius: 12px; border-left: 4px solid #667eea;">
-        <h3 style="color: #667eea; margin: 0 0 0.5rem 0; font-size: 1.2rem;">📧 Konfigurasi Email</h3>
+        <h3 style="color: #667eea; margin: 0 0 0.5rem 0; font-size: 1.2rem;"><i class="fas fa-cog" style="margin-right: 0.5rem;"></i>Konfigurasi Email</h3>
         <p style="color: #666; margin: 0; font-size: 0.85rem;">Atur kredensial SMTP untuk mengirim email</p>
     </div>
     """, unsafe_allow_html=True)
     
-    with st.sidebar.expander("⚙️ Pengaturan SMTP", expanded=False):
-        smtp_server = st.text_input("🌐 Server SMTP", value="smtp.gmail.com", key="smtp_server", help="Masukkan server SMTP provider email Anda")
-        smtp_port = st.number_input("🔌 Port SMTP", value=587, key="smtp_port", help="Port standar untuk Gmail: 587")
-        email_address = st.text_input("📧 Alamat Email Anda", key="email_address", help="Email yang akan digunakan untuk mengirim")
-        email_password = st.text_input("🔒 Password/App Password", type="password", key="email_password", help="Gunakan App Password untuk Gmail")
+    with st.sidebar.expander("Pengaturan SMTP", expanded=False):
+        smtp_server = st.text_input("Server SMTP", value="smtp.gmail.com", key="smtp_server", help="Masukkan server SMTP provider email Anda", placeholder="smtp.gmail.com")
+        smtp_port = st.number_input("Port SMTP", value=587, key="smtp_port", help="Port standar untuk Gmail: 587")
+        email_address = st.text_input("Alamat Email Anda", key="email_address", help="Email yang akan digunakan untuk mengirim", placeholder="nama@domain.com")
+        email_password = st.text_input("Password/App Password", type="password", key="email_password", help="Gunakan App Password untuk Gmail")
         
-        if st.button("💾 Simpan Konfigurasi Email", type="primary"):
+        if st.button("Simpan Konfigurasi Email", type="primary"):
             if email_address and email_password:
                 st.session_state.email_credentials = {
                     'smtp_server': smtp_server,
@@ -144,9 +145,9 @@ def main():
                     'email': email_address,
                     'password': email_password
                 }
-                st.success("✅ Konfigurasi email berhasil disimpan!")
+                st.success("Konfigurasi email berhasil disimpan!")
             else:
-                st.error("❌ Mohon lengkapi semua field email")
+                st.error("Mohon lengkapi semua field email")
     
     # Main content based on selected page
     if page == "Single Email Validation":
@@ -165,7 +166,7 @@ def main():
 def single_email_validation():
     st.markdown("""
     <div class="feature-card">
-        <h2 style="color: #667eea; margin-top: 0;">🔍 Validasi Email Tunggal</h2>
+        <h2 style="color: #667eea; margin-top: 0;"><i class="fas fa-search" style="margin-right: 0.5rem;"></i>Validasi Email Tunggal</h2>
         <p style="color: #666; margin-bottom: 0;">Validasi alamat email untuk sintaks, domain, dan deliverability.</p>
     </div>
     """, unsafe_allow_html=True)
@@ -189,43 +190,43 @@ def single_email_validation():
                     if result['is_valid']:
                         st.markdown(f"""
                         <div style="background: linear-gradient(135deg, #48bb78, #38a169); color: white; padding: 1rem; border-radius: 12px; margin: 1rem 0;">
-                            <h3 style="margin: 0; color: white;">✅ Email Valid!</h3>
+                            <h3 style="margin: 0; color: white;"><i class="fas fa-check-circle" style="margin-right: 0.5rem;"></i>Email Valid!</h3>
                             <p style="margin: 0.5rem 0 0 0; opacity: 0.9;"><strong>{email_to_validate}</strong> dapat menerima email</p>
                         </div>
                         """, unsafe_allow_html=True)
                     else:
                         st.markdown(f"""
                         <div style="background: linear-gradient(135deg, #f56565, #e53e3e); color: white; padding: 1rem; border-radius: 12px; margin: 1rem 0;">
-                            <h3 style="margin: 0; color: white;">❌ Email Tidak Valid</h3>
+                            <h3 style="margin: 0; color: white;"><i class="fas fa-times-circle" style="margin-right: 0.5rem;"></i>Email Tidak Valid</h3>
                             <p style="margin: 0.5rem 0 0 0; opacity: 0.9;"><strong>{email_to_validate}</strong> tidak dapat menerima email</p>
                         </div>
                         """, unsafe_allow_html=True)
                 else:
                     st.markdown("""
                     <div style="background: #fed7d7; color: #c53030; padding: 1rem; border-radius: 8px; border-left: 4px solid #f56565;">
-                        ⚠️ Mohon masukkan alamat email untuk divalidasi.
+                        <i class="fas fa-exclamation-triangle" style="margin-right: 0.5rem;"></i>Mohon masukkan alamat email untuk divalidasi.
                     </div>
                     """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
         <div class="feature-card">
-            <h3 style="color: #667eea; margin-top: 0;">✨ Fitur Validasi</h3>
+            <h3 style="color: #667eea; margin-top: 0;"><i class="fas fa-star" style="margin-right: 0.5rem;"></i>Fitur Validasi</h3>
             <div style="padding: 1rem 0;">
                 <div style="margin: 1rem 0; padding: 0.5rem; background: #f8f9ff; border-radius: 8px;">
-                    <strong>🔤 Validasi Sintaks</strong><br>
+                    <strong><i class="fas fa-spell-check" style="margin-right: 0.5rem;"></i>Validasi Sintaks</strong><br>
                     <small>Format email dan karakter khusus</small>
                 </div>
                 <div style="margin: 1rem 0; padding: 0.5rem; background: #f8f9ff; border-radius: 8px;">
-                    <strong>🌐 Verifikasi Domain</strong><br>
+                    <strong><i class="fas fa-globe" style="margin-right: 0.5rem;"></i>Verifikasi Domain</strong><br>
                     <small>Keberadaan domain dan DNS</small>
                 </div>
                 <div style="margin: 1rem 0; padding: 0.5rem; background: #f8f9ff; border-radius: 8px;">
-                    <strong>📬 Cek MX Record</strong><br>
+                    <strong><i class="fas fa-server" style="margin-right: 0.5rem;"></i>Cek MX Record</strong><br>
                     <small>Ketersediaan mail server</small>
                 </div>
                 <div style="margin: 1rem 0; padding: 0.5rem; background: #f8f9ff; border-radius: 8px;">
-                    <strong>🔌 Verifikasi SMTP</strong><br>
+                    <strong><i class="fas fa-plug" style="margin-right: 0.5rem;"></i>Verifikasi SMTP</strong><br>
                     <small>Keberadaan mailbox</small>
                 </div>
             </div>
@@ -236,7 +237,7 @@ def single_email_validation():
 def email_sender_page():
     st.markdown("""
     <div class="feature-card">
-        <h2 style="color: #667eea; margin-top: 0;">📤 Pengirim Email Massal</h2>
+        <h2 style="color: #667eea; margin-top: 0;"><i class="fas fa-paper-plane" style="margin-right: 0.5rem;"></i>Pengirim Email Massal</h2>
         <p style="color: #666; margin-bottom: 0;">Buat dan kirim email secara individual atau massal dengan tampilan profesional.</p>
     </div>
     """, unsafe_allow_html=True)
@@ -244,7 +245,7 @@ def email_sender_page():
     if not st.session_state.email_credentials:
         st.markdown("""
         <div style="background: #fed7d7; color: #c53030; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #f56565; margin: 1rem 0;">
-            <h3 style="margin: 0 0 0.5rem 0; color: #c53030;">⚠️ Konfigurasi Diperlukan</h3>
+            <h3 style="margin: 0 0 0.5rem 0; color: #c53030;"><i class="fas fa-exclamation-triangle" style="margin-right: 0.5rem;"></i>Konfigurasi Diperlukan</h3>
             <p style="margin: 0;">Mohon konfigurasikan kredensial email Anda di sidebar terlebih dahulu untuk menggunakan fitur ini.</p>
         </div>
         """, unsafe_allow_html=True)
@@ -253,7 +254,7 @@ def email_sender_page():
     # Modern email composition header
     st.markdown("""
     <div class="feature-card">
-        <h3 style="color: #667eea; margin-top: 0;">✍️ Tulis Email</h3>
+        <h3 style="color: #667eea; margin-top: 0;"><i class="fas fa-edit" style="margin-right: 0.5rem;"></i>Tulis Email</h3>
     </div>
     """, unsafe_allow_html=True)
     
@@ -323,7 +324,7 @@ def email_sender_page():
     with col2:
         st.markdown("""
         <div class="feature-card">
-            <h3 style="color: #667eea; margin-top: 0;">📊 Statistik Email</h3>
+            <h3 style="color: #667eea; margin-top: 0;"><i class="fas fa-chart-bar" style="margin-right: 0.5rem;"></i>Statistik Email</h3>
         </div>
         """, unsafe_allow_html=True)
         
@@ -376,11 +377,11 @@ def email_sender_page():
                 <div class="stats-container">
                     <div class="stat-card" style="border-left: 4px solid #48bb78;">
                         <div class="stat-number" style="color: #48bb78;">{successful}</div>
-                        <div class="stat-label">✅ Berhasil Dikirim</div>
+                        <div class="stat-label"><i class="fas fa-check" style="margin-right: 0.3rem;"></i>Berhasil Dikirim</div>
                     </div>
                     <div class="stat-card" style="border-left: 4px solid #f56565;">
                         <div class="stat-number" style="color: #f56565;">{failed}</div>
-                        <div class="stat-label">❌ Gagal Dikirim</div>
+                        <div class="stat-label"><i class="fas fa-times" style="margin-right: 0.3rem;"></i>Gagal Dikirim</div>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
