@@ -22,10 +22,16 @@ def load_custom_css():
         with open(css_file) as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     
-    # Load Font Awesome
+    # Load Font Awesome and Poppins
     st.markdown("""
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+    * {
+        font-family: 'Poppins', sans-serif !important;
+    }
     .main-header {
         text-align: center;
         padding: 2rem;
