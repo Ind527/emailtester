@@ -12,8 +12,22 @@ st.set_page_config(
     page_title="Email Validation & Bulk Sender",
     page_icon="✉",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="auto"  # Auto-collapse on mobile
 )
+
+# Mobile detection
+def detect_mobile():
+    st.markdown("""
+    <script>
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isSmallScreen = window.innerWidth <= 768;
+    if (isMobile || isSmallScreen) {
+        window.parent.postMessage({type: 'streamlit:setComponentValue', value: true}, '*');
+    } else {
+        window.parent.postMessage({type: 'streamlit:setComponentValue', value: false}, '*');
+    }
+    </script>
+    """, unsafe_allow_html=True)
 
 # Load custom CSS
 def load_custom_css():
@@ -22,8 +36,9 @@ def load_custom_css():
         with open(css_file) as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     
-    # Load Font Awesome and Poppins
+    # Add mobile responsive viewport meta tag and load fonts
     st.markdown("""
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -93,9 +108,13 @@ if 'validated_emails' not in st.session_state:
     st.session_state.validated_emails = pd.DataFrame()
 
 def main():
-    # Load custom styling
+    # Load custom styling and detect mobile
     load_custom_css()
     load_custom_js()
+    
+    # Simple mobile detection using viewport width
+    is_mobile = st.sidebar.checkbox("Mobile View", value=False, help="Check for mobile-optimized layout")
+    st.session_state['is_mobile'] = is_mobile
     
     # Ultra Modern Hero Header
     st.markdown("""
@@ -173,7 +192,14 @@ def single_email_validation():
     </div>
     """, unsafe_allow_html=True)
     
-    col1, col2 = st.columns([2, 1])
+    # Responsive layout for single email validation
+    if st.session_state.get('is_mobile', False):
+        # Mobile: stack vertically
+        col1 = st.container()
+        col2 = st.container()
+    else:
+        # Desktop: side by side
+        col1, col2 = st.columns([2, 1])
     
     with col1:
         # Use form to enable Enter key validation
@@ -247,7 +273,14 @@ def email_sender_page():
     </div>
     """, unsafe_allow_html=True)
     
-    col1, col2 = st.columns([2, 1])
+    # Responsive layout for email sender
+    if st.session_state.get('is_mobile', False):
+        # Mobile: stack vertically
+        col1 = st.container()
+        col2 = st.container()
+    else:
+        # Desktop: side by side
+        col1, col2 = st.columns([2, 1])
     
     with col1:
         # Recipients
@@ -406,7 +439,14 @@ def scheduled_emails_page():
     from utils.scheduler import EmailScheduler
     scheduler = EmailScheduler()
     
-    col1, col2 = st.columns([2, 1])
+    # Responsive layout for scheduled emails
+    if st.session_state.get('is_mobile', False):
+        # Mobile: stack vertically  
+        col1 = st.container()
+        col2 = st.container()
+    else:
+        # Desktop: side by side
+        col1, col2 = st.columns([2, 1])
     
     with col1:
         # Get scheduled jobs
