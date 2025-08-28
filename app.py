@@ -39,7 +39,6 @@ def load_custom_css():
     # Add mobile responsive viewport meta tag and load fonts
     st.markdown("""
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -120,7 +119,7 @@ def main():
     st.markdown("""
     <div class="hero-header floating">
         <h1 class="hero-title">
-            <i class="fas fa-envelope" style="margin-right: 0.5rem;"></i>EmailPro
+            EmailPro
         </h1>
         <p class="hero-subtitle">Validate & Send Emails Effortlessly</p>
     </div>
@@ -129,7 +128,7 @@ def main():
     # Simplified Navigation
     st.sidebar.markdown("""
     <div class="nav-card">
-        <h2 class="nav-title"><i class="fas fa-rocket" style="margin-right: 0.5rem;"></i>Menu</h2>
+        <h2 class="nav-title">Menu</h2>
         <p class="nav-subtitle">Choose your tool</p>
     </div>
     """, unsafe_allow_html=True)
@@ -138,18 +137,18 @@ def main():
         "Select Tool:",
         ["Single Email Validation", "Bulk Email Validation", "Email Discovery", "Email Sender", "Scheduled Emails"],
         format_func=lambda x: {
-            "Single Email Validation": "🎯 Single Validator",
-            "Bulk Email Validation": "📊 Bulk Validator", 
-            "Email Discovery": "🔍 Email Finder",
-            "Email Sender": "📤 Email Sender",
-            "Scheduled Emails": "⏰ Scheduler"
+            "Single Email Validation": "Single Validator",
+            "Bulk Email Validation": "Bulk Validator", 
+            "Email Discovery": "Email Finder",
+            "Email Sender": "Email Sender",
+            "Scheduled Emails": "Scheduler"
         }.get(x, x)
     )
     
     # Simplified Email Config
     st.sidebar.markdown("""
     <div class="nav-card">
-        <h3 style="color: white; margin: 0; font-size: 1.1rem;"><i class="fas fa-cog" style="margin-right: 0.5rem;"></i>Email Config</h3>
+        <h3 style="color: white; margin: 0; font-size: 1.1rem;">Email Config</h3>
     </div>
     """, unsafe_allow_html=True)
     
@@ -188,7 +187,7 @@ def main():
 def single_email_validation():
     st.markdown("""
     <div class="glass-card glowing">
-        <h2 style="color: white; margin-top: 0; font-size: 2rem;"><i class="fas fa-search" style="margin-right: 0.5rem;"></i>Email Validator</h2>
+        <h2 style="color: white; margin-top: 0; font-size: 2rem;">Email Validator</h2>
     </div>
     """, unsafe_allow_html=True)
     
@@ -218,33 +217,33 @@ def single_email_validation():
                     if result['is_valid']:
                         st.markdown(f"""
                         <div class="success-card">
-                            <h3 style="margin: 0; display: flex; align-items: center;"><i class="fas fa-check-circle" style="margin-right: 0.5rem;"></i>Valid Email!</h3>
+                            <h3 style="margin: 0; display: flex; align-items: center;">Valid Email!</h3>
                             <p style="margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 1.1rem;"><strong>{email_to_validate}</strong></p>
                         </div>
                         """, unsafe_allow_html=True)
                     else:
                         st.markdown(f"""
                         <div class="error-card">
-                            <h3 style="margin: 0; display: flex; align-items: center;"><i class="fas fa-times-circle" style="margin-right: 0.5rem;"></i>Invalid Email</h3>
+                            <h3 style="margin: 0; display: flex; align-items: center;">Invalid Email</h3>
                             <p style="margin: 0.5rem 0 0 0; opacity: 0.9; font-size: 1.1rem;"><strong>{email_to_validate}</strong></p>
                         </div>
                         """, unsafe_allow_html=True)
                 else:
                     st.markdown("""
                     <div class="warning-card">
-                        <p style="margin: 0; display: flex; align-items: center;"><i class="fas fa-exclamation-triangle" style="margin-right: 0.5rem;"></i>Please enter an email address</p>
+                        <p style="margin: 0; display: flex; align-items: center;">Please enter an email address</p>
                     </div>
                     """, unsafe_allow_html=True)
     
     with col2:
         st.markdown("""
         <div class="glass-card">
-            <h3 style="color: white; margin-top: 0; text-align: center;"><i class="fas fa-star" style="margin-right: 0.5rem;"></i>Features</h3>
+            <h3 style="color: white; margin-top: 0; text-align: center;">Features</h3>
             <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin-top: 1rem;">
-                <span class="feature-pill"><i class="fas fa-spell-check"></i>Syntax</span>
-                <span class="feature-pill"><i class="fas fa-globe"></i>Domain</span>
-                <span class="feature-pill"><i class="fas fa-server"></i>MX Record</span>
-                <span class="feature-pill"><i class="fas fa-plug"></i>SMTP</span>
+                <span class="feature-pill">Syntax</span>
+                <span class="feature-pill">Domain</span>
+                <span class="feature-pill">MX Record</span>
+                <span class="feature-pill">SMTP</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -253,14 +252,14 @@ def single_email_validation():
 def email_sender_page():
     st.markdown("""
     <div class="glass-card glowing">
-        <h2 style="color: white; margin-top: 0; font-size: 2rem;"><i class="fas fa-paper-plane" style="margin-right: 0.5rem;"></i>Email Sender</h2>
+        <h2 style="color: white; margin-top: 0; font-size: 2rem;">Email Sender</h2>
     </div>
     """, unsafe_allow_html=True)
     
     if not st.session_state.email_credentials:
         st.markdown("""
         <div class="warning-card">
-            <h3 style="margin: 0; display: flex; align-items: center;"><i class="fas fa-exclamation-triangle" style="margin-right: 0.5rem;"></i>Setup Required</h3>
+            <h3 style="margin: 0; display: flex; align-items: center;">Setup Required</h3>
             <p style="margin: 0.5rem 0 0 0;">Configure your email credentials in the sidebar first.</p>
         </div>
         """, unsafe_allow_html=True)
@@ -269,7 +268,7 @@ def email_sender_page():
     # Simplified composition header
     st.markdown("""
     <div class="glass-card">
-        <h3 style="color: white; margin-top: 0;"><i class="fas fa-edit" style="margin-right: 0.5rem;"></i>Compose</h3>
+        <h3 style="color: white; margin-top: 0;">Compose</h3>
     </div>
     """, unsafe_allow_html=True)
     
@@ -346,7 +345,7 @@ def email_sender_page():
     with col2:
         st.markdown("""
         <div class="glass-card">
-            <h3 style="color: white; margin-top: 0; text-align: center;"><i class="fas fa-chart-bar" style="margin-right: 0.5rem;"></i>Stats</h3>
+            <h3 style="color: white; margin-top: 0; text-align: center;">Stats</h3>
         </div>
         """, unsafe_allow_html=True)
         
@@ -395,11 +394,11 @@ def email_sender_page():
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-number" style="color: #4facfe;">{successful}</div>
-                        <div class="stat-label"><i class="fas fa-check" style="margin-right: 0.3rem;"></i>Sent</div>
+                        <div class="stat-label">Sent</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number" style="color: #fa709a;">{failed}</div>
-                        <div class="stat-label"><i class="fas fa-times" style="margin-right: 0.3rem;"></i>Failed</div>
+                        <div class="stat-label">Failed</div>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -409,7 +408,7 @@ def email_sender_page():
                     st.markdown("### Failed Sends")
                     failed_results = [r for r in results if not r['success']]
                     for result in failed_results:
-                        st.error(f"❌ {result['recipient']}: {result['error']}")
+                        st.error(f"{result['recipient']}: {result['error']}")
             
             else:  # Schedule for later
                 if scheduled_time:
@@ -427,13 +426,13 @@ def email_sender_page():
                         st.session_state.email_credentials, is_html=(message_format == "HTML")
                     )
                     
-                    st.success(f"✅ Email scheduled successfully! Job ID: {job_id}")
+                    st.success(f"Email scheduled successfully! Job ID: {job_id}")
                     st.info(f"Email will be sent on: {scheduled_time.strftime('%Y-%m-%d %H:%M:%S')}")
         else:
             st.error("Please fill in all required fields.")
 
 def scheduled_emails_page():
-    st.header("⏰ Scheduled Emails")
+    st.header("Scheduled Emails")
     st.markdown("View and manage your scheduled email jobs.")
     
     from utils.scheduler import EmailScheduler
@@ -453,7 +452,7 @@ def scheduled_emails_page():
         jobs = scheduler.get_scheduled_jobs()
         
         if jobs:
-            st.subheader("📅 Scheduled Jobs")
+            st.subheader("Scheduled Jobs")
             
             for job in jobs:
                 with st.expander(f"Job {job['id']} - {job['subject']}", expanded=False):
@@ -476,30 +475,30 @@ def scheduled_emails_page():
                                 st.success("Job cancelled!")
                                 st.rerun()
         else:
-            st.info("📭 No scheduled emails found.")
+            st.info("No scheduled emails found.")
     
     with col2:
         st.markdown("### Quick Actions")
         
-        if st.button("🔄 Refresh Jobs"):
+        if st.button("Refresh Jobs"):
             st.rerun()
         
-        if st.button("🧹 Clear Completed Jobs"):
+        if st.button("Clear Completed Jobs"):
             scheduler.clear_completed_jobs()
             st.success("Completed jobs cleared!")
             st.rerun()
         
         st.markdown("### Job Status Legend")
         st.info("""
-        **📅 Pending** - Waiting to be sent
+        **Pending** - Waiting to be sent
         
-        **📤 Sending** - Currently sending
+        **Sending** - Currently sending
         
-        **✅ Completed** - Successfully sent
+        **Completed** - Successfully sent
         
-        **❌ Failed** - Send failed
+        **Failed** - Send failed
         
-        **⏸️ Cancelled** - Job cancelled
+        **Cancelled** - Job cancelled
         """)
 
 if __name__ == "__main__":
