@@ -595,7 +595,7 @@ footer {
 }
 
 /* Mobile Navigation Button - Hamburger Menu */
-.stSidebar > div:first-child > button {
+.stSidebar button[kind="header"] {
     background: var(--glass-bg) !important;
     backdrop-filter: var(--blur) !important;
     border: 1px solid var(--glass-border) !important;
@@ -604,28 +604,95 @@ footer {
     width: 40px !important;
     height: 40px !important;
     position: relative !important;
+    padding: 0 !important;
 }
 
-.stSidebar > div:first-child > button:before {
+/* Hide the default Streamlit hamburger icon */
+.stSidebar button[kind="header"] > div > svg {
+    display: none !important;
+}
+
+/* Create hamburger lines */
+.stSidebar button[kind="header"]:after {
     content: '' !important;
     position: absolute !important;
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
-    width: 20px !important;
+    width: 18px !important;
     height: 2px !important;
     background: white !important;
-    box-shadow: 0 -6px 0 white, 0 6px 0 white !important;
+    box-shadow: 0 -5px 0 white, 0 5px 0 white !important;
+    display: block !important;
 }
 
-/* Hide the default Streamlit hamburger icon */
-.stSidebar > div:first-child > button > svg {
+/* Alternative approach - try different selectors */
+.stSidebar .stButton > button {
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--blur) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 8px !important;
+    position: relative !important;
+}
+
+.stSidebar .stButton > button:after {
+    content: '☰' !important;
+    color: white !important;
+    font-size: 16px !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+}
+
+/* Force show hamburger menu - Multiple approaches */
+.stSidebar .stButton button,
+.stSidebar button,
+button[data-testid="stSidebarNavigation"],
+button[data-testid="sidebar-nav-button"],
+.st-emotion-cache-1gwvy71 button {
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--blur) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 8px !important;
+    width: 40px !important;
+    height: 40px !important;
+    position: relative !important;
+    padding: 0 !important;
+}
+
+/* Force show hamburger lines using Unicode */
+.stSidebar .stButton button::after,
+.stSidebar button::after,
+button[data-testid="stSidebarNavigation"]::after,
+button[data-testid="sidebar-nav-button"]::after,
+.st-emotion-cache-1gwvy71 button::after {
+    content: '≡' !important;
+    color: white !important;
+    font-size: 20px !important;
+    font-weight: bold !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    display: block !important;
+    line-height: 1 !important;
+}
+
+/* Hide all SVG icons in sidebar buttons */
+.stSidebar svg,
+.stSidebar .stButton svg,
+button[data-testid="stSidebarNavigation"] svg,
+button[data-testid="sidebar-nav-button"] svg {
     display: none !important;
 }
 
 /* Mobile hamburger menu styling */
 @media (max-width: 768px) {
-    .stSidebar > div:first-child > button {
+    .stSidebar button,
+    .stSidebar .stButton button,
+    button[data-testid="stSidebarNavigation"],
+    button[data-testid="sidebar-nav-button"] {
         position: fixed !important;
         top: 1rem !important;
         left: 1rem !important;
@@ -633,7 +700,8 @@ footer {
         box-shadow: var(--shadow-light) !important;
     }
     
-    .stSidebar > div:first-child > button:hover {
+    .stSidebar button:hover,
+    .stSidebar .stButton button:hover {
         background: var(--primary-light) !important;
         transform: scale(1.1) !important;
     }
