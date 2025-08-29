@@ -645,20 +645,24 @@ footer {
     transform: translate(-50%, -50%) !important;
 }
 
-/* Force show hamburger menu - Multiple approaches */
+/* Force show hamburger menu - Multiple approaches with improved targeting */
 .stSidebar .stButton button,
 .stSidebar button,
 button[data-testid="stSidebarNavigation"],
 button[data-testid="sidebar-nav-button"],
-.st-emotion-cache-1gwvy71 button {
+.st-emotion-cache-1gwvy71 button,
+[data-testid="collapsedControl"] button,
+.stSidebar [data-testid="collapsedControl"] button {
     background: var(--glass-bg) !important;
     backdrop-filter: var(--blur) !important;
     border: 1px solid var(--glass-border) !important;
-    border-radius: 8px !important;
-    width: 40px !important;
-    height: 40px !important;
+    border-radius: 12px !important;
+    width: 44px !important;
+    height: 44px !important;
     position: relative !important;
     padding: 0 !important;
+    box-shadow: var(--shadow-light) !important;
+    transition: all 0.3s ease !important;
 }
 
 /* Force show hamburger lines using Font Awesome */
@@ -666,21 +670,25 @@ button[data-testid="sidebar-nav-button"],
 .stSidebar button::after,
 button[data-testid="stSidebarNavigation"]::after,
 button[data-testid="sidebar-nav-button"]::after,
-.st-emotion-cache-1gwvy71 button::after {
+.st-emotion-cache-1gwvy71 button::after,
+[data-testid="collapsedControl"] button::after,
+.stSidebar [data-testid="collapsedControl"] button::after {
     content: '\f0c9' !important;
-    font-family: 'Font Awesome 6 Free' !important;
+    font-family: 'Font Awesome 6 Free', 'FontAwesome', sans-serif !important;
     font-weight: 900 !important;
     color: white !important;
-    font-size: 16px !important;
+    font-size: 18px !important;
     position: absolute !important;
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
     display: block !important;
     line-height: 1 !important;
+    text-align: center !important;
+    z-index: 10 !important;
 }
 
-/* Hide all SVG icons in sidebar buttons */
+/* Hide all SVG icons and unwanted text in sidebar buttons */
 .stSidebar svg,
 .stSidebar .stButton svg,
 button[data-testid="stSidebarNavigation"] svg,
@@ -688,23 +696,80 @@ button[data-testid="sidebar-nav-button"] svg {
     display: none !important;
 }
 
+/* Hide specific unwanted text elements */
+.stSidebar span:contains("keyboard_double_arrow_right"),
+.stSidebar [data-testid*="keyboard_double_arrow_right"],
+.stSidebar button span:contains("keyboard_double_arrow_right"),
+.stSidebar button [aria-label*="keyboard_double_arrow_right"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Hide any span or text nodes that might contain unwanted text */
+.stSidebar button span,
+.stSidebar button div span,
+button[data-testid="stSidebarNavigation"] span,
+button[data-testid="sidebar-nav-button"] span {
+    font-size: 0 !important;
+    opacity: 0 !important;
+    display: none !important;
+}
+
+/* Enhanced hamburger menu for all screen sizes */
+.stSidebar button:hover,
+.stSidebar .stButton button:hover,
+button[data-testid="stSidebarNavigation"]:hover,
+button[data-testid="sidebar-nav-button"]:hover,
+[data-testid="collapsedControl"] button:hover {
+    background: var(--primary-light) !important;
+    transform: scale(1.05) !important;
+    box-shadow: var(--shadow-hover) !important;
+}
+
 /* Mobile hamburger menu styling */
 @media (max-width: 768px) {
     .stSidebar button,
     .stSidebar .stButton button,
     button[data-testid="stSidebarNavigation"],
-    button[data-testid="sidebar-nav-button"] {
+    button[data-testid="sidebar-nav-button"],
+    [data-testid="collapsedControl"] button {
         position: fixed !important;
         top: 1rem !important;
         left: 1rem !important;
-        z-index: 999 !important;
-        box-shadow: var(--shadow-light) !important;
+        z-index: 9999 !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+        width: 48px !important;
+        height: 48px !important;
     }
     
-    .stSidebar button:hover,
-    .stSidebar .stButton button:hover {
-        background: var(--primary-light) !important;
-        transform: scale(1.1) !important;
+    .stSidebar button::after,
+    .stSidebar .stButton button::after,
+    button[data-testid="stSidebarNavigation"]::after,
+    button[data-testid="sidebar-nav-button"]::after,
+    [data-testid="collapsedControl"] button::after {
+        font-size: 20px !important;
+    }
+}
+
+/* Tablet hamburger menu styling */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .stSidebar button,
+    .stSidebar .stButton button,
+    button[data-testid="stSidebarNavigation"],
+    button[data-testid="sidebar-nav-button"] {
+        width: 46px !important;
+        height: 46px !important;
+    }
+}
+
+/* Desktop hamburger menu styling */
+@media (min-width: 1025px) {
+    .stSidebar button,
+    .stSidebar .stButton button,
+    button[data-testid="stSidebarNavigation"],
+    button[data-testid="sidebar-nav-button"] {
+        width: 44px !important;
+        height: 44px !important;
     }
 }
 
