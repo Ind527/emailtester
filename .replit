@@ -50,3 +50,4 @@ externalPort = 80
 
 [agent]
 integrations = ["web_scraper==1.0.0"]
+expertMode = true
